@@ -1,15 +1,23 @@
 package com.example.demo2.geographicalGraph;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public interface GeographicalGraph {
-    public boolean addVertex(TopologicalVertex topologicalVertex);
-    public boolean addEdge(TopologicalVertex tv1, TopologicalVertex tv2, String text);
-    public boolean removeVertex(TopologicalVertex topologicalVertex);
-    public boolean removeEdge(TopologicalVertex topologicalVertex, String text);
-    public boolean rewriteEdgeText(TopologicalVertex topologicalVertex, String text);
-    public boolean rewriteVertexValue(TopologicalVertex topologicalVertex);
-    public ArrayList<TopologicalVertex> getGraph();
+    boolean addVertex(TopologicalVertex topologicalVertex);
+    boolean addEdge(TopologicalVertex tvFrom, TopologicalVertex tvTo, String text);
+    boolean removeVertex(TopologicalVertex topologicalVertex);
+    boolean removeEdge(TopologicalVertex tvFrom, TopologicalVertex tvTo, String text);
+    boolean rewriteEdgeText(TopologicalVertex tvFrom, TopologicalVertex tvTo, String originalText, String newText);
+    boolean rewriteVertexValue(TopologicalVertex topologicalVertex, int value);
+    boolean uniteVertices(TopologicalVertex tvFrom, TopologicalVertex tvTo);
+    boolean highlightVertex(TopologicalVertex topologicalVertex);
+    boolean unhighlightVertex(TopologicalVertex topologicalVertex);
+    boolean highlightEdge(TopologicalVertex tvFrom, TopologicalVertex tvTo, String text);
+    boolean unhighlightEdge(TopologicalVertex tvFrom, TopologicalVertex tvTo, String text);
+    void beautify();
+    //todo - premenovat toto, asi na get vertices, je to lepsie, aby v tom nebol zmatok
+    HashSet<TopologicalVertex> getGraph();
     //toto si vyberie
     //kazdy algoritmus, skontroluje ci su tam sprvne veci, a potom
     //pojde robit podla toho

@@ -18,16 +18,17 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
-        VBox vb = (VBox) fxmlLoader.load();
-        HBox hb = (HBox) vb.getChildrenUnmodifiable().get(0);
-        Pane p = (Pane) hb.getChildrenUnmodifiable().get(1);
+        //VBox vb = (VBox) fxmlLoader.load();
+        //HBox hb = (HBox) vb.getChildrenUnmodifiable().get(0);
+        //Pane p = (Pane) hb.getChildrenUnmodifiable().get(1);
         //todo - toto odstranit, chceme aby kazdy algorimus bud dostal graf uz z obrazovky
         //ktory skontoluje, alebo ak bude chciet uzivat menit veci na grafe, tak bude musiet klikat
         //na nejkay button
         //po skonceni algoritmu vrati tento GeografickyGraf, s ktroym uz uzivatel bude moct posuvat veci
         //HelloController.geographicalGraph = new SimpleGeographicalGraph_1(p);
 
-        Scene scene = new Scene(vb, 1000, 500);
+        //je potrebne tu dat minimalnu velkost okna, alebo nieco podobne
+        Scene scene = new Scene(fxmlLoader.load(), 1000, 500);
         stage.setTitle("Wheeler graphs");
         stage.setScene(scene);
         stage.show();

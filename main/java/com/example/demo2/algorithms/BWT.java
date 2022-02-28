@@ -11,7 +11,7 @@ public class BWT {
     private final ArrayList<String> sortedRotations;
 
     public BWT(String content){
-        this.content = '$' + content;
+        this.content = content + '$';
         rotations = new ArrayList<>();
         sortedRotations = new ArrayList<>();
         fillRotations();

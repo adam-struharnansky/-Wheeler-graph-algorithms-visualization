@@ -1,35 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <VBox alignment="CENTER" prefHeight="700.0" prefWidth="694.0" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.demo2.HelloController">
+   <MenuBar>
+      <menus>
+         <Menu mnemonicParsing="false" text="Algoritmy">
+           <items>
+             <MenuItem mnemonicParsing="false" onAction="#setAlgorithmToTest" text="test" />
+           </items>
+         </Menu>
+         <Menu mnemonicParsing="false" text="Language">
+           <items>
+             <MenuItem mnemonicParsing="false" onAction="#changeLanguageToEnglish" text="English" />
+               <MenuItem mnemonicParsing="false" onAction="#changeLanguageToSlovak" text="Slovensky" />
+           </items>
+         </Menu>
+      </menus>
+   </MenuBar>
 
-   <HBox prefHeight="384.0" prefWidth="620.0">
-      <children>
-         <VBox prefHeight="200.0" prefWidth="100.0"> </VBox>
-         <Pane fx:id="graph_pane" prefHeight="328.0" prefWidth="300.0" />
-         <Pane fx:id="matrix_pane" prefHeight="328.0" prefWidth="225.0" />
-      </children>
-   </HBox>
-
-
-    <Label fx:id="main_label" />
-   <HBox prefHeight="100.0" prefWidth="200.0">
-      <children>
-          <Button onAction="#onGraphPaneClick" text="Start">
-            <HBox.margin>
-               <Insets left="20.0" right="20.0" />
-            </HBox.margin>
-         </Button>
-         <TextField fx:id="textToGraph" />
-         <Button mnemonicParsing="false" onAction="#onGraphFromStringClick" text="Create Graph from String">
-            <HBox.margin>
-               <Insets left="20.0" right="20.0" />
-            </HBox.margin>
-         </Button>
-         <Button mnemonicParsing="false" onAction="#onNextStepClick" text="Next step" />
-      </children>
-   </HBox>
+   <HBox fx:id="algorithmDisplay" prefHeight="384.0" prefWidth="620.0" />
+   <HBox fx:id="algorithmController" prefHeight="100.0" prefWidth="200.0" />
 </VBox>

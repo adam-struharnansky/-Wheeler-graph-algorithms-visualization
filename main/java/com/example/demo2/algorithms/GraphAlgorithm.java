@@ -1,11 +1,9 @@
 package com.example.demo2.algorithms;
 
-import com.example.demo2.geographicalGraph.TopologicalVertex;
+import com.example.demo2.geographicalGraph.GeographicalGraph;
 
-import java.util.ArrayList;
-
-public interface GraphAlgorithm extends Algorithm{
-    ArrayList<TopologicalVertex> getGraph();
+public interface GraphAlgorithm extends AlgorithmInterface {
+    GeographicalGraph getGeographicalGraph();
 }
 
 

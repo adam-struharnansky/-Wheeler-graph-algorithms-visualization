@@ -1,5 +1,6 @@
 package com.example.demo2.algorithms;
 
+import com.example.demo2.geographicalGraph.GeographicalGraph;
 import com.example.demo2.geographicalGraph.TopologicalVertex;
 import javafx.scene.layout.Pane;
 
@@ -9,6 +10,7 @@ public class CreateGraphFromString implements MatrixAlgorithm, GraphAlgorithm{
 
     private final BWTMatrixGraphical bwtMatrixGraphical;
     private final CreateGraphFromStringGraphical createGraphFromStringGraphical;
+    private boolean first;
 
     public CreateGraphFromString(Pane graph_pane, Pane matrix_pane, String text){
         graph_pane.getChildren().clear();
@@ -16,33 +18,42 @@ public class CreateGraphFromString implements MatrixAlgorithm, GraphAlgorithm{
         BWT bwt = new BWT(text);
         this.bwtMatrixGraphical = new BWTMatrixGraphical(matrix_pane, bwt, text.length());
         this.createGraphFromStringGraphical = new CreateGraphFromStringGraphical(graph_pane, bwt, text + '$');
+        this.first = true;
     }
 
     @Override
     public boolean hasNext() {
+        //treba sa vobec pytat aj grafovej casti? mali by by rovnake
         return this.bwtMatrixGraphical.hasNext();
     }
 
     @Override
     public String nextStep() {
+        //co robi toto?
         this.bwtMatrixGraphical.nextStep();
-        //chceme nejako grafu povedat, ze on tiez potrebuje vediet, ktoru hranu ide menit
-        //teda on si chce prejst vsetky hrany, a potom sa rozhodne, ze tato je ta, ktora je spravna
-        //on si z textu ale tiez urobi bwt
-        //a tiez si to usporiada, a iba bude robit v tom istom case to iste
-        //je este moznost, ze  by vracali miesto, ktore je zasiahnute, aby sa vytvorila sipka medzi danymi vecami
-
-        //this.createGraphFromStringGraphical.nextStep();
+        if(!first) {
+            this.createGraphFromStringGraphical.nextStep();
+        }
+        else{
+            first = false;
+        }
         return null;
     }
-
+/*
     @Override
     public ArrayList<TopologicalVertex> getGraph() {
         return this.createGraphFromStringGraphical.getGraph();
+    }
+*/
+
+    @Override
+    public GeographicalGraph getGeographicalGraph() {
+        return this.createGraphFromStringGraphical.getGeographicalGraph();
     }
 
     @Override
     public ArrayList<String> getMatrix() {
         return this.bwtMatrixGraphical.getMatrix();
     }
+
 }
