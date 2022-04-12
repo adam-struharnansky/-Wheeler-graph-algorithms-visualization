@@ -1,94 +1,102 @@
 package com.example.demo2.algorithmDisplays;
 
-import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-
-import java.util.ArrayList;
+import javafx.scene.paint.Color;
 
 public class MatrixDisplay extends Display {
 
-    private final Pane pane;
-    private final ArrayList<ArrayList<String>> matrix;
-    private final ArrayList<ArrayList<Label>> labelMatrix;
-    private int numberOfColumns = 0, numberOfRows = 0;
+    private Matrix matrix;
 
-    private class Arrow {
-        private Arrow(int sr, int sc, int er, int ec){
-            //todo
-            //ulozit si to niekde
-            //pridat realne v pane
-        }
-
-        private void cover(){
-            //todo pre minimize
-        }
-
-        private void uncover(){
-            //todo pre maximize
-        }
-    }
-
-
-    public MatrixDisplay(VBox container, String name, int ratio, AlgorithmDisplay.Resizer resizer) {
-        super(container, name, ratio, resizer);
-        this.pane = super.getPane();
-
-        this.matrix = new ArrayList<>();
-        this.labelMatrix = new ArrayList<>();
+    public MatrixDisplay(VBox container, String name, int ratio) {
+        super(container, name, ratio);
+        //todo - prerobit, musim
+        System.out.println(super.getWidth()+" "+super.getHeight());
+        this.matrix = new Matrix(super.getPane(), 0,0,super.getWidth(), super.getWidth());
     }
 
     @Override
     public void centre(){
         //todo
-        //to znamena ze chceme najst centrum, a nan to vycetrovat
-        System.out.println("md centre");
     }
 
-    public void setMatrixSize(int numberOfColumns, int numberOfRows){
-        this.numberOfColumns = numberOfColumns;
-        this.numberOfRows = numberOfRows;
-        //todo
-        //vymazat to co tam bolo doteraz na obrazovke
-        //vymazat obsah struktur
-        //vytvorit nove
-        //tieto pridat
+    @Override
+    public void setSize(double width, double height){
+        super.setSize(width, height);
+        this.matrix.setBorders(0,0, width, height - 20.0);
     }
 
-    public void test(){
+    public void setMatrixSize(int numberOfRows, int numberOfColumns){
+        this.matrix.setMatrixSize(numberOfRows, numberOfColumns);
     }
 
-    public boolean highlightSquare(int columnNumber, int rowNumber){
-        if(columnNumber < 0 || columnNumber >= this.numberOfColumns || rowNumber < 0 || rowNumber >= this.numberOfRows){
-            return false;
-        }
-        //todo
-        //zvyraznit dany stvorcek
-        return true;
+    public void highlightSquare(int rowNumber, int columnNumber){
+        this.matrix.highlightSquare(rowNumber, columnNumber);
     }
 
-    public boolean highlightRow(int rowNumber){
-        return true;//todo
+    public void highlightRow(int rowNumber){
+        this.matrix.highlightRow(rowNumber);
     }
 
-    public boolean highlightColumn(int columnNumber){
-        return true;//todo
+    public void highlightColumn(int columnNumber){
+        this.matrix.highlightColumn(columnNumber);
     }
 
-    public boolean setSquareColor(int rowNumber, int columnNumber){
-        return true;//todo
+    public void setSquareColor(int rowNumber, int columnNumber, Color color){
+        this.matrix.setSquareColor(rowNumber, columnNumber, color);
     }
 
-    public boolean setSquareText(int rowNumber, int columnNumber, String text){
-        return true;
+    public void setSquareText(int rowNumber, int columnNumber, String text){
+        this.matrix.setSquareText(rowNumber, columnNumber, text);
     }
 
-    //niektore funkcie tu by mali byt také, že ich zmena je ina. Teda, vytvorenie niecoho
-    //by mohlo byt animovatelne. Treba pozriet, ako sa to robi este pred tym
-    //nez sa cele toto naprogramuje
+    public void setSquareText(int rowNumber, int columnNumber, int text){
+        this.matrix.setSquareText(rowNumber, columnNumber, text);
+    }
 
-    //nebude najednoduchsie iba odstranit pane z hboxu? potom by tam nemal byt zobrazeny,
-    //ale vsetky veci by sa snim mali robit nadalej jednoducho
+    public void setSquareText(int rowNumber, int columnNumber, char c){
+        this.matrix.setSquareText(rowNumber, columnNumber, c);
+    }
+
+    public void setSquareIndex(int rowNumber, int columnNumber, String index){
+        this.matrix.setSquareIndex(rowNumber, columnNumber, index);
+    }
+
+    public void setSquareIndex(int rowNumber, int columnNumber, int text){
+        this.matrix.setSquareIndex(rowNumber, columnNumber, text);
+    }
+
+    public void setSquareIndex(int rowNumber, int columnNumber, char c){
+        this.matrix.setSquareIndex(rowNumber, columnNumber, c);
+    }
+
+    public void addArrow(int startRow, int startColumn, int endRow, int endColumn){
+        this.matrix.addArrow(startRow, startColumn, endRow, endColumn);
+    }
+
+    public void removeArrow(int startRow, int startColumn, int endRow, int endColumn){
+        this.matrix.removeArrow(startRow, startColumn, endRow, endColumn);
+    }
+
+    public void setArrowColor(int startRow, int startColumn, int endRow, int endColumn, Color color){
+        this.matrix.setArrowColor(startRow, startColumn, endRow, endColumn, color);
+    }
+
+    public void highlightArrow(int startRow, int startColumn, int endRow, int endColumn){
+        this.matrix.highlightArrow(startRow, startColumn, endRow, endColumn);
+    }
+
+    public void unhighlightArrow(int startRow, int startColumn, int endRow, int endColumn){
+        this.matrix.unhighlightArrow(startRow, startColumn, endRow, endColumn);
+    }
+
+    public void clearArrows(){
+        this.matrix.clearArrows();
+    }
+
+    public void setSize(double size){
+        this.matrix.setSize(size);
+        centre();
+    }
 
 
 }

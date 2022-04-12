@@ -1,49 +1,53 @@
 package com.example.demo2;
 
+import com.example.demo2.algorithmManager.*;
+import com.example.demo2.multilingualism.Languages;
 import javafx.fxml.FXML;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.HBox;
-
-import com.example.demo2.algorithms.*;
 
 public class HelloController {
 
     @FXML
-    private HBox algorithmController;
+    private Pane algorithmController;
 
     @FXML
     private HBox algorithmDisplay;
 
-    private Algorithm algorithm = null;
+    private AlgorithmManager algorithmManager;
 
     @FXML
     protected void changeLanguageToSlovak(){
-        //todo
+        Languages.setLanguage("sk");
     }
 
     @FXML
     protected void changeLanguageToEnglish(){
-        //todo
+        Languages.setLanguage("en");
     }
 
-    private void clear(){
+    private void setAlgorithm(AlgorithmType algorithmType){
         this.algorithmController.getChildren().clear();
         this.algorithmDisplay.getChildren().clear();
+        if(this.algorithmManager == null){
+            this.algorithmManager = new AlgorithmManager(this.algorithmController, this.algorithmDisplay);
+        }
+        this.algorithmManager.changeAlgorithm(algorithmType);
     }
 
     @FXML
     protected void setAlgorithmToTest(){
-        clear();
-        this.algorithm = new TestAlgorithm(this.algorithmController, this.algorithmDisplay);
+        setAlgorithm(AlgorithmType.Test);
     }
 
     @FXML
     protected void setAlgorithmToBWT(){
-        clear();
-
+        setAlgorithm(AlgorithmType.BWT);
     }
 
     @FXML
-    protected void fxmlTest(){
-        System.out.println("fxmlTest");
-    }
+    protected void setAlgorithmToSA(){setAlgorithm(AlgorithmType.SAIntroduction);}
+
+    @FXML
+    protected void setAlgorithmToWG(){setAlgorithm(AlgorithmType.WGFromBWT);}
 }

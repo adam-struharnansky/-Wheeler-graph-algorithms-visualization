@@ -1,10 +1,12 @@
 package com.example.demo2.algorithmDisplays;
 
+import com.example.demo2.multilingualism.LanguageListenerAdder;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.util.Pair;
 
 public class Display{
 
@@ -14,25 +16,25 @@ public class Display{
     private final String name;
     private final Pane pane;
     private final int ratio;
-    private final AlgorithmDisplay.Resizer resizer;
 
-    public Display(VBox container, String name, int ratio, AlgorithmDisplay.Resizer resizer){
+    private double width;
+    private double height;
+
+    public Display(VBox container, String name, int ratio){
         this.container = container;
         this.name = name;
         this.ratio = ratio;
-        this.resizer = resizer;
         this.isMinimized = false;
         this.pane = new Pane();
+        container.setFillWidth(true);
 
         this.toolBar = new ToolBar();
         this.toolBar.setStyle("-fx-border-color: black");
-        Label nameLabel = new Label(name);//todo, zmenit to tak, aby to bralo veci podla slovnika
+        Label nameLabel = new Label();
+        LanguageListenerAdder.addLanguageListener(name, nameLabel);
         this.toolBar.getItems().add(nameLabel);
-        //todo - pridat tam asi hbox tak, aby boli buttony zarovnane doprava
-        Button centreButton = new Button("+");
-        centreButton.setOnAction(actionEvent -> centre());
-        this.toolBar.getItems().add(centreButton);
-        Button changeSizeButton = new Button("*");
+
+        Button changeSizeButton = new Button("*");//todo - porozmyslat, ako toto vykrelsit co najlepsie
         changeSizeButton.setOnAction(actionEvent -> {
             if (isMinimized) {
                 maximize();
@@ -40,23 +42,29 @@ public class Display{
                 minimize();
             }
         });
+
         this.toolBar.getItems().add(changeSizeButton);
         this.container.getChildren().add(this.toolBar);
         this.container.getChildren().add(this.pane);
-
     }
 
-    //toto by mala kazda funkcia overridnut, kedze tu sa nechceme chytat obsahu, iba formy
-    public void centre(){    }
+    //todo - vyhodit nejaku vynimku, toto musi byt overridnute
+    public  void centre(){
+        System.err.println("Neoverridnuta funkcia centre.");
+    }
+
+    public void resize(){
+        //System.out.println("neoveridnute funckia resize");
+    }
 
     private void minimize(){
         if(this.isMinimized){
             return;
         }
         this.container.getChildren().remove(this.pane);
-        setPreferredWidth(20);//todo - toto sa mozno zmeni
+        setSize(20.0, this.height);//todo - toto sa mozno zmeni
         this.isMinimized = true;
-        this.resizer.resize();
+        DisplayManager.resize();
     }
 
     private void maximize(){
@@ -65,7 +73,7 @@ public class Display{
         }
         this.container.getChildren().add(this.pane);
         this.isMinimized = false;
-        this.resizer.resize();
+        DisplayManager.resize();
     }
 
     public boolean isMinimized(){
@@ -73,21 +81,61 @@ public class Display{
     }
 
     public double getWidth(){
-        return this.container.getWidth();
+        return this.width;
     }
+
+    public double getHeight(){ return this.height;}
 
     protected Pane getPane(){
         return this.pane;
+    }
+
+    protected Pair<Double, Double> getPosition(){
+        return new Pair<>(this.container.getLayoutX(), this.container.getLayoutY());
     }
 
     protected int getRatio(){
         return this.ratio;
     }
 
-    protected void setPreferredWidth(double width){
-        this.toolBar.setPrefWidth(width); //su tieto dve potrebne? Vyskusat treba, resp najst na nete.
-        this.pane.setPrefWidth(width);
-        this.container.setPrefWidth(width);
+    protected void setSize(double width, double height){
+        this.toolBar.setMinWidth(width);
+        this.toolBar.setPrefWidth(width);
+
+        this.pane.setMaxSize(width - 20.0, height);
+        this.pane.setPrefSize(width -20.0, height);
+        this.container.setMaxSize(width, height);
+
+        this.width = width;
+        this.height = height;
+    }
+
+    public String getName(){
+        return this.name;
+    }
+
+    //napr centre, beautify, mozno zmena velksti pisma? to by bolo faj mat vsade
+    interface ControlButtonAction{
+        void doAction();
+    }
+
+    protected void addButton(String name, ControlButtonAction controlButtonAction){
+        Button controlButton = new Button();
+        controlButton.setOnAction(actionEvent -> controlButtonAction.doAction());
+        LanguageListenerAdder.addLanguageListener(name, controlButton);
+        this.toolBar.getItems().add(1, controlButton);
+    }
+
+    protected void disableButtons(){
+        this.toolBar.getItems().forEach((item) -> item.setDisable(true));
+    }
+
+    protected void enableButtons(){
+        this.toolBar.getItems().forEach((item) -> item.setDisable(false));
+    }
+
+    protected void delete(){
+        this.pane.getChildren().remove(this.container);
     }
 
 }

@@ -1,46 +1,26 @@
 package com.example.demo2.algorithms;
 
-import com.example.demo2.algorithmController.AlgorithmController;
-import com.example.demo2.algorithmDisplays.AlgorithmDisplay;
-import com.example.demo2.algorithmDisplays.MatrixDisplay;
-import com.example.demo2.algorithmDisplays.TextDisplay;
-import javafx.scene.layout.HBox;
+import com.example.demo2.algorithmDisplays.*;
+import com.example.demo2.algorithmManager.AlgorithmManager;
 
 public class TestAlgorithm extends Algorithm {
 
-    private final MatrixDisplay bwtDisplay1;
-    private final MatrixDisplay bwtDisplay2;
-    private final MatrixDisplay bwtDisplay3;
-    private final TextDisplay bwtDisplay4;
+    private OrientedGraphDisplay graphDisplay;
+    private MatrixDisplay matrixDisplay;
+    private TextDisplay textDisplay;
 
-    private final AlgorithmDisplay algorithmDisplay;
-    private final AlgorithmController algorithmController;
+    public TestAlgorithm(AlgorithmManager algorithmManager){
+        super(algorithmManager);
 
-    public TestAlgorithm(HBox algorithmControllerHBox, HBox algorithmDisplayHBox){
-        this.algorithmDisplay = new AlgorithmDisplay(algorithmDisplayHBox);
-        this.algorithmController = new AlgorithmController(algorithmControllerHBox);
-
-        this.bwtDisplay1 = (MatrixDisplay)
-                this.algorithmDisplay.addDisplay(AlgorithmDisplay.DisplayType.Matrix, "D1", 2);
-        this.bwtDisplay2 = (MatrixDisplay)
-                this.algorithmDisplay.addDisplay(AlgorithmDisplay.DisplayType.Matrix, "D2", 3);
-        this.bwtDisplay3 = (MatrixDisplay)
-                this.algorithmDisplay.addDisplay(AlgorithmDisplay.DisplayType.Matrix, "D3", 4);
-        this.bwtDisplay4 = (TextDisplay)
-                this.algorithmDisplay.addDisplay(AlgorithmDisplay.DisplayType.Text, "D4", 2);
-
-        this.algorithmController.add("NextStep",new Algorithm.InvokerNextStep());
-    }
+        this.graphDisplay = (OrientedGraphDisplay) super.addDisplay(DisplayManager.DisplayType.DirectedGraph, "", 1);
+        this.matrixDisplay = (MatrixDisplay) super.addDisplay(DisplayManager.DisplayType.Matrix, "", 1);
+        this.textDisplay = (TextDisplay) super.addDisplay(DisplayManager.DisplayType.Text, "", 1);
 
 
-    @Override
-    public boolean hasNext() {
-        System.out.println("in test");
-        return true;
     }
 
     @Override
     public void nextStep() {
-
     }
+
 }
