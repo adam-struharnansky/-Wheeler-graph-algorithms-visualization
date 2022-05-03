@@ -1,26 +1,161 @@
 package com.example.demo2.algorithms;
 
 import com.example.demo2.algorithmDisplays.*;
+import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
+import com.example.demo2.algorithmDisplays.animatableNodes.Edge;
+import com.example.demo2.algorithmDisplays.animatableNodes.Vertex;
 import com.example.demo2.algorithmManager.AlgorithmManager;
+import com.example.demo2.animations.Animation;
+import com.example.demo2.animations.AnimationManager;
+import com.example.demo2.animations.AnimationType;
+import javafx.scene.paint.Color;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 public class TestAlgorithm extends Algorithm {
 
-    private OrientedGraphDisplay graphDisplay;
-    private MatrixDisplay matrixDisplay;
+    private GraphDisplay graphDisplay;
     private TextDisplay textDisplay;
+
+    private CodeDisplay codeDisplay1;
+    private CodeDisplay codeDisplay2;
+    private CodeDisplay codeDisplay3;
+
+    private  final ArrayList<Vertex> vertices = new ArrayList<>();;
+    private final ArrayList<Vertex> visibleVertices = new ArrayList<>();
+
+    private final AnimationManager animationManager = new AnimationManager();
+
+    private final Random random = new Random();
+
+    private static int V = 10;
 
     public TestAlgorithm(AlgorithmManager algorithmManager){
         super(algorithmManager);
+        this.graphDisplay = (GraphDisplay) WindowManager.addDisplay(DisplayType.DirectedGraph, "",1);
 
-        this.graphDisplay = (OrientedGraphDisplay) super.addDisplay(DisplayManager.DisplayType.DirectedGraph, "", 1);
-        this.matrixDisplay = (MatrixDisplay) super.addDisplay(DisplayManager.DisplayType.Matrix, "", 1);
-        this.textDisplay = (TextDisplay) super.addDisplay(DisplayManager.DisplayType.Text, "", 1);
+        for(int i = 0;i<V;i++){
+            Vertex v = this.graphDisplay.addVertex();
+            v.setRelativePosition(random.nextDouble(),random.nextDouble());
+            v.setValue(i);
+            this.vertices.add(v);
+            this.visibleVertices.add(v);
+        }
+
+        for(int i = 0;i<15;i++){
+            int start = Math.abs(random.nextInt()%V);
+            int end = Math.abs(random.nextInt()%V);
+            if(start != end) {
+               // Edge edge = this.graphDisplay.addEdge(this.vertices.get(start), this.vertices.get(end));
+               // edge.setText(i);
+            }
+        }
+
+        super.addNextBackAnimateControls(0,1,0,0,0,2);
+    }
+
+    int step = 0;
+    int highestStep = 0;
+
+    class Step{
+        Vertex v1;
+        Vertex v2;
+        Vertex vn;
+    }
+
+    final HashMap<Integer, Step> steps = new HashMap<>();
 
 
+
+    public void nextStep(boolean animate) {
+        animate = true;
+
+        Animation animation = animationManager.getAnimation(step);
+
+        if(step == highestStep){
+            for(Vertex vertex:this.vertices){
+                if(random.nextDouble() <= 0.25){
+                    if(visibleVertices.contains(vertex)){
+                        animation.addAnimatable(AnimationType.DisappearAnimation, vertex);
+                        double x = random.nextDouble();
+                        double y = random.nextDouble();
+                        animation.addAnimatable(AnimationType.RelativeMoveAnimation, vertex, x, y);
+                        visibleVertices.remove(vertex);
+                    }
+                    else{
+                        animation.addAnimatable(AnimationType.AppearAnimation, vertex);
+                        visibleVertices.add(vertex);
+                    }
+                }
+                else {
+                    if(visibleVertices.contains(vertex)) {
+                        double x = random.nextDouble();
+                        double y = random.nextDouble();
+                        animation.addAnimatable(AnimationType.RelativeMoveAnimation, vertex, x, y);
+                        animation.addAnimatable(AnimationType.ColorAnimation, vertex,
+                                new Color(x, y, 1.0 - x, 1.0));
+                    }
+                }
+            }
+        }
+
+        if(animate){
+            animationManager.executeAnimation(step, true);
+        }
+        else{
+            animationManager.endCurrentAnimation(true);
+            animation.endAnimation();
+        }
+
+        step++;
+        highestStep = Math.max(highestStep, step);
+        super.backStepButton.setDisable(false);
     }
 
     @Override
-    public void nextStep() {
+    protected void backStep(boolean animate){
+        animate = true;
+        if(step > 0) {
+            step--;
+            if (animate) {
+                animationManager.executeAnimation(step, false);
+            } else {
+                animationManager.endAnimation(step, false);
+            }
+        }
+        if(step == 0){
+            super.backStepButton.setDisable(true);
+        }
+    }
+
+    private final ArrayList<Vertex> invisibleVertices = new ArrayList<>();
+    private final ArrayList<Edge> edges = new ArrayList<>();
+
+
+
+    void test1(String s){
+        codeDisplay1.addLine(s);
+        codeDisplay2.addLine(s);
+        codeDisplay3.addLine(s);
+    }
+    void test2(String s, int i){
+        codeDisplay1.addVariable(s, i);
+        codeDisplay2.addVariable(s,i);
+        codeDisplay3.addVariable(s,i);
+    }
+
+    void testHL(int i){
+        codeDisplay1.highlightLine(i);
+        codeDisplay2.highlightLine(i);
+        codeDisplay3.highlightLine(i);
+    }
+
+    void testHV(String s){
+        codeDisplay1.highlightVariable(s);
+        codeDisplay2.highlightVariable(s);
+        codeDisplay3.highlightVariable(s);
     }
 
 }

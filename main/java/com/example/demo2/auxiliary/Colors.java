@@ -6,24 +6,27 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Colors {
-    private final ArrayList<Color> colors;
-    private final Random random;
-    public Colors(int numberOfColors){
-        this.colors = new ArrayList<>();
-        this.random = new Random();
-        for(int i = 0;i<numberOfColors;i++){
-            addColor();
-        }
+
+    public final static Color highlightingColor = Color.color(1.0,1.0,0.0,0.3);
+
+    private static final ArrayList<Color> colors = new ArrayList<>();
+    private static final Random random = new Random();
+
+    static {
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+        colors.add(Color.BLUE);
+        //todo - Add some more distinct colors
     }
-    public void addColor(){
-        //todo - aby to davalo nejake logicke a pekne odlisitelne farby - najko to vymysliet
-        colors.add(Color.rgb(this.random.nextInt() % 256,
-                this.random.nextInt() % 256, this.random.nextInt() %256));
-    }
-    public Color getColor(int i){
-        if(i < 0 || i >= this.colors.size()){
+
+
+    public static Color getColor(int colorNumber){
+        if(colorNumber < 0 ){
             return null;
         }
-        return this.colors.get(i);
+        while(colors.size() <= colorNumber){
+            colors.add(new Color(random.nextDouble(), random.nextDouble(), random.nextDouble(), 1.0));
+        }
+        return colors.get(colorNumber);
     }
 }

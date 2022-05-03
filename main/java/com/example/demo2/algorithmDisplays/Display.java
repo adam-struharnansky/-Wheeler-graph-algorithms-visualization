@@ -48,13 +48,11 @@ public class Display{
         this.container.getChildren().add(this.pane);
     }
 
-    //todo - vyhodit nejaku vynimku, toto musi byt overridnute
     public  void centre(){
-        System.err.println("Neoverridnuta funkcia centre.");
+        resize();
     }
 
     public void resize(){
-        //System.out.println("neoveridnute funckia resize");
     }
 
     private void minimize(){
@@ -64,7 +62,7 @@ public class Display{
         this.container.getChildren().remove(this.pane);
         setSize(20.0, this.height);//todo - toto sa mozno zmeni
         this.isMinimized = true;
-        DisplayManager.resize();
+        WindowManager.redrawDisplays();
     }
 
     private void maximize(){
@@ -73,7 +71,7 @@ public class Display{
         }
         this.container.getChildren().add(this.pane);
         this.isMinimized = false;
-        DisplayManager.resize();
+        WindowManager.redrawDisplays();
     }
 
     public boolean isMinimized(){

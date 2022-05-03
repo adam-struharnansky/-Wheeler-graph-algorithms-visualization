@@ -47,8 +47,7 @@ public class LanguageListenerAdder {
         Languages.addListener(new MenuItemLanguageListener());
     }
 
-    public void addLanguageListener(SelectorDisplay selectorDisplay){
-        selectorDisplay.changeLanguage();
+    public static void addLanguageListener(SelectorDisplay selectorDisplay){
         class MenuItemLanguageListener implements LanguageListener{
             @Override
             public void changeOfLanguage(){selectorDisplay.changeLanguage();
@@ -56,6 +55,4 @@ public class LanguageListenerAdder {
         }
         Languages.addListener(new MenuItemLanguageListener());
     }
-
-
 }

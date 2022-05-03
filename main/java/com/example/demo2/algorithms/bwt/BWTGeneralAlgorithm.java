@@ -1,8 +1,9 @@
 package com.example.demo2.algorithms.bwt;
 
-import com.example.demo2.algorithmDisplays.DisplayManager;
+import com.example.demo2.algorithmDisplays.WindowManager;
 import com.example.demo2.algorithmDisplays.MatrixDisplay;
 import com.example.demo2.algorithmDisplays.TextDisplay;
+import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
 import com.example.demo2.algorithmManager.AlgorithmManager;
 import com.example.demo2.algorithmManager.AlgorithmType;
 import com.example.demo2.algorithms.Algorithm;
@@ -30,19 +31,22 @@ public class BWTGeneralAlgorithm extends Algorithm {
 
     public BWTGeneralAlgorithm(AlgorithmManager algorithmManager) {
         super(algorithmManager);
-        this.matrixDisplay = (MatrixDisplay) super.addDisplay(DisplayManager.DisplayType.Matrix, "", 1);
-        this.textDisplay = (TextDisplay) super.addDisplay(DisplayManager.DisplayType.Text, "", 1);
+        this.matrixDisplay = (MatrixDisplay) WindowManager.addDisplay(DisplayType.Matrix, "BWTMatrix", 1);
+        this.textDisplay = (TextDisplay) WindowManager.addDisplay(DisplayType.Text, "algorithmDescription", 1);
         this.algorithmManager = algorithmManager;
-        //todo - zakazat vstup $ - skotrolovat
-        this.inputTextField = new TextField();
-        super.addController(this.inputTextField, 0,0);
+        this.inputTextField = new TextField("abrakadabra");
+        this.inputTextField.textProperty().addListener(((observableValue, oldValue, newValue) -> {
+            if(!newValue.contains("\\$")){
+                this.inputTextField.setText(newValue.replaceAll("\\$", ""));
+            }
+        }));
+        WindowManager.addController(this.inputTextField, 0,0);
 
         this.startButton = new Button();
-        LanguageListenerAdder.addLanguageListener("startAlgorithm", this.startButton);
-        this.startButton.setOnAction(actionEvent -> start(this.inputTextField.getText().replaceAll("\\$", "")));
-        super.addController(this.startButton, 1,0);
-        //todo - pridat opis alg
-
+        LanguageListenerAdder.addLanguageListener("start", this.startButton);
+        this.startButton.setOnAction(actionEvent -> start(this.inputTextField.getText()));
+        WindowManager.addController(this.startButton, 0,1);
+        this.textDisplay.addString("inputTextForAlgorithm", "", true);
     }
 
     private void start(String input){
@@ -60,21 +64,24 @@ public class BWTGeneralAlgorithm extends Algorithm {
             end.append(start.charAt(0));
             start.deleteCharAt(0);
         }
-        //todo - pridat popis alg
-        super.removeController(this.startButton);
-        super.removeController(this.inputTextField);
+        this.textDisplay.clear();
+        this.textDisplay.addString("BWTGeneralAlgorithmStart", "", true);
+
+        WindowManager.removeController(this.startButton);
+        WindowManager.removeController(this.inputTextField);
+
         this.endButton = new Button();
-        LanguageListenerAdder.addLanguageListener("", this.endButton);
+        LanguageListenerAdder.addLanguageListener("sort", this.endButton);
         this.endButton.setOnAction(actionEvent -> end());
-        super.addController(this.endButton, 0, 0);
+        WindowManager.addController(this.endButton, 0, 0);
     }
 
     private void end(){
         this.matrixDisplay.setSquareText(0,0, "F");
         this.matrixDisplay.setSquareText(0, this.input.length() - 1, "L");
-        this.matrixDisplay.setSquareColor(0,0, Color.BLUE);
+        this.matrixDisplay.setSquareTextColor(0,0, Color.BLUE);
         this.matrixDisplay.highlightSquare(0,0);
-        this.matrixDisplay.setSquareColor(0, this.input.length() - 1, Color.RED);
+        this.matrixDisplay.setSquareTextColor(0, this.input.length() - 1, Color.RED);
         this.matrixDisplay.highlightSquare(0,this.input.length() - 1);
 
         this.rotations.sort(Comparator.naturalOrder());
@@ -83,32 +90,32 @@ public class BWTGeneralAlgorithm extends Algorithm {
             for(int j = 0;j<this.input.length();j++){
                 this.matrixDisplay.setSquareText(i + 1, j, this.rotations.get(i).charAt(j));
             }
-            this.matrixDisplay.setSquareColor(i + 1, 0, Color.BLUE);
+            this.matrixDisplay.setSquareTextColor(i + 1, 0, Color.BLUE);
             this.matrixDisplay.highlightSquare(i + 1, 0);
-            this.matrixDisplay.setSquareColor(i + 1, this.input.length() - 1, Color.RED);
+            this.matrixDisplay.setSquareTextColor(i + 1, this.input.length() - 1, Color.RED);
             this.matrixDisplay.highlightSquare(i + 1, this.input.length() - 1);
             stringBuilderOutput.append(this.rotations.get(i).charAt(input.length()-1));
         }
-        super.removeController(this.endButton);
+        WindowManager.removeController(this.endButton);
         this.output = stringBuilderOutput.toString();
-        //todo - popis alg
+
+        this.textDisplay.clear();
+        this.textDisplay.addString("BWTGeneralAlgorithmEnd", "", true);
+        this.textDisplay.addString(" L = "+this.output, "", false);
 
         Button retryButton = new Button();
         retryButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.BWTEncode));
-        LanguageListenerAdder.addLanguageListener("", retryButton);
-        super.addController(retryButton, 0,0);
+        LanguageListenerAdder.addLanguageListener("retry", retryButton);
+        WindowManager.addController(retryButton, 0,0);
 
         Button decodeButton = new Button();
         decodeButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.BWTDecode, this.output));
-        LanguageListenerAdder.addLanguageListener("", decodeButton);
-        super.addController(decodeButton, 1,0);
+        LanguageListenerAdder.addLanguageListener("retransform", decodeButton);
+        WindowManager.addController(decodeButton, 0,1);
 
         Button bwtButton = new Button();
         bwtButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.BWT));
-        LanguageListenerAdder.addLanguageListener("", bwtButton);
-        super.addController(bwtButton, 2,0);
-
-        //todo - uvodna obrazovka
+        LanguageListenerAdder.addLanguageListener("returnToBWT", bwtButton);
+        WindowManager.addController(bwtButton, 0,2);
     }
-
 }

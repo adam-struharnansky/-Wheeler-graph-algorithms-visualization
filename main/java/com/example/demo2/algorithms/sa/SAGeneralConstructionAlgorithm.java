@@ -1,9 +1,11 @@
 package com.example.demo2.algorithms.sa;
 
-import com.example.demo2.algorithmDisplays.DisplayManager;
+import com.example.demo2.algorithmDisplays.WindowManager;
 import com.example.demo2.algorithmDisplays.MatrixDisplay;
 import com.example.demo2.algorithmDisplays.TextDisplay;
+import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
 import com.example.demo2.algorithmManager.AlgorithmManager;
+import com.example.demo2.algorithmManager.AlgorithmType;
 import com.example.demo2.algorithms.Algorithm;
 import com.example.demo2.multilingualism.LanguageListenerAdder;
 import javafx.scene.control.Button;
@@ -28,17 +30,17 @@ public class SAGeneralConstructionAlgorithm extends Algorithm {
     public SAGeneralConstructionAlgorithm(AlgorithmManager algorithmManager) {
         super(algorithmManager);
         this.algorithmManager = algorithmManager;
-        this.matrixDisplay = (MatrixDisplay) super.addDisplay(DisplayManager.DisplayType.Matrix, "", 1);
-        this.textDisplay = (TextDisplay) super.addDisplay(DisplayManager.DisplayType.Text, "", 1);
+        this.matrixDisplay = (MatrixDisplay) WindowManager.addDisplay(DisplayType.Matrix, "", 1);
+        this.textDisplay = (TextDisplay) WindowManager.addDisplay(DisplayType.Text, "", 1);
 
-        this.inputTextField = new TextField();
-        super.addController(this.inputTextField, 0,0);
+        this.inputTextField = new TextField("abrakadabra");
+        WindowManager.addController(this.inputTextField, 0,0);
 
         this.startButton = new Button();
-        LanguageListenerAdder.addLanguageListener("startAlgorithm", this.startButton);
-        //todo - povedat cloveku pripadne, ze vsetky tieto boli odstranene
+        LanguageListenerAdder.addLanguageListener("start", this.startButton);
+        //todo - povedat cloveku pripadne, ze vsetky $ boli odstranene
         this.startButton.setOnAction(actionEvent -> start(this.inputTextField.getText().replaceAll("\\$", "")));
-        super.addController(this.startButton, 1,0);
+        WindowManager.addController(this.startButton, 0,1);
     }
 
     private void start(String input){
@@ -57,15 +59,16 @@ public class SAGeneralConstructionAlgorithm extends Algorithm {
             this.matrixDisplay.setSquareText(i + 1, 2, suffixes.get(i));
         }
         //todo - pridat popis alg
-        super.removeController(this.startButton);
-        super.removeController(this.inputTextField);
+        WindowManager.removeController(this.startButton);
+        WindowManager.removeController(this.inputTextField);
         this.endButton = new Button();
-        LanguageListenerAdder.addLanguageListener("", this.endButton);
+        LanguageListenerAdder.addLanguageListener("sort", this.endButton);
         this.endButton.setOnAction(actionEvent -> end());
-        super.addController(this.endButton, 0, 0);
+        WindowManager.addController(this.endButton, 0, 0);
     }
 
     private void end(){
+        //todo - popis algoritmu
         this.matrixDisplay.setSquareText(0,0, "i");
         this.matrixDisplay.setSquareText(0,1, "LCS[i]");
         this.matrixDisplay.setSquareText(0,2, "SA[i]");
@@ -91,10 +94,12 @@ public class SAGeneralConstructionAlgorithm extends Algorithm {
             this.matrixDisplay.setSquareText(i + 1, 2, this.input.length() - this.suffixes.get(i).length());
             this.matrixDisplay.setSquareText(i + 1, 3, this.suffixes.get(i));
         }
-        super.removeController(this.endButton);
+        WindowManager.removeController(this.endButton);
 
-        //todo - pripisat dalsie veci, co mozme po tomto robit
-        //alebo mozme celu vec hodit do ejdneho riadku, toto nemsui byt ako matica.. nic sa s tymto nebude robit
+        Button retryButton = new Button();
+        LanguageListenerAdder.addLanguageListener("retry", retryButton);
+        retryButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.SAIntroduction));
+
+        //todo - pripisat dalsie veci, co mozme po tomto robit - ked bude naprogramovane vyhladavanie
     }
-
 }

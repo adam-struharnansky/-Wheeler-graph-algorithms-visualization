@@ -1,5 +1,9 @@
 package com.example.demo2.algorithmDisplays;
 
+import javafx.geometry.Insets;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CubicCurve;
@@ -8,7 +12,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Matrix extends Sector{
@@ -393,7 +396,9 @@ public class Matrix extends Sector{
     public void highlightSquare(int rowNumber, int columnNumber){
         if(isInMatrix(rowNumber, columnNumber)) {
             this.textFlowMatrix.get(rowNumber).get(columnNumber).setStyle("-fx-font-weight: bold");
-            //todo - skontorlovat, ci to obidvoje, aj idnex aj text
+            //todo - nastavit rovnaku farbu ako je pri texte
+            this.textFlowMatrix.get(rowNumber).get(columnNumber).setBackground(
+                    new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
         }
     }
 
@@ -409,6 +414,28 @@ public class Matrix extends Sector{
         if(isColumnInMatrix(columnNumber)){
             for(int r = 0; r < this.numberOfRows; r++){
                 highlightSquare(r, columnNumber);
+            }
+        }
+    }
+
+    public void unhighlightSquare(int rowNumber, int columnNumber){
+        if(isInMatrix(rowNumber, columnNumber)) {
+            this.textFlowMatrix.get(rowNumber).get(columnNumber).setStyle("-fx-font-weight: normal");
+        }
+    }
+
+    public void unhighlightRow(int rowNumber){
+        if(isRowInMatrix(rowNumber)){
+            for(int c = 0; c < this.numberOfColumns; c++){
+                unhighlightSquare(rowNumber, c);
+            }
+        }
+    }
+
+    public void unhighlightColumn(int columnNumber){
+        if(isColumnInMatrix(columnNumber)){
+            for(int r = 0; r < this.numberOfRows; r++){
+                unhighlightSquare(r, columnNumber);
             }
         }
     }

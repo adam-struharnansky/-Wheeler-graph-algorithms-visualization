@@ -5,100 +5,144 @@ import com.example.demo2.multilingualism.Languages;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 
 public class TextDisplay extends Display{
 
-    private final Pane pane;
-    private final TextFlow textFlow;
+    /*
+    todo reprogram, add possibility to use style for each inputted String
+    possible to use commented class TextPart in the end of this file
+     */
 
-    private class TextPart{
-        String key;
-        Text text;
-        String style;//asi nie je potrebne, aj tak je to stale ulozene v texte todo - skontrolovat
-        boolean translatable;
-        TextPart(String key, Text text, String style, boolean translatable){
-            this.key = key;
-            this.text = text;
-            this.style = style;
-            this.translatable = translatable;
-        }
-    }
-    private final ArrayList<TextPart> textParts;
+    private final static double padding = 10.0;
+
+    private final Pane pane;
+    private final ArrayList<Text> texts = new ArrayList<>();
+
+    private final ArrayList<Pair<String, Boolean>> keys = new ArrayList<>();
 
     public TextDisplay(VBox container, String name, int ratio) {
         super(container, name, ratio);
-
         this.pane = super.getPane();
-
-        this.textFlow = new TextFlow();
-        this.pane.getChildren().add(this.textFlow);
-        this.textParts = new ArrayList<>();
-
         LanguageListenerAdder.addLanguageListener(this);
     }
 
     @Override
     public void centre(){
 
-        int lineLength = 50;//todo - dynamicka zmena
-        int currentLineLength = 0;
+        this.texts.forEach(text -> this.pane.getChildren().remove(text));
+        this.texts.clear();
 
-        //todo, aby to nerobilo novy riadok hocikde, ale iba na medzere
-        for(TextPart textPart:this.textParts){
-            StringBuilder stringBuilder = new StringBuilder();
-            for(int i = 0;i<textPart.text.getText().length();i++){
-                if(textPart.text.getText().charAt(i) != '\n'){
-                    stringBuilder.append(textPart.text.getText().charAt(i));
-                    currentLineLength++;
+        StringBuilder stringBuilder = new StringBuilder();
+        this.keys.forEach(pair-> {
+            if(pair.getValue()){
+                stringBuilder.append(Languages.getString(pair.getKey()));
+            }
+            else{
+                stringBuilder.append(pair.getKey());
+            }
+        });
+
+        String content = stringBuilder.toString();
+        while(content.length() > 0){
+            Text line = new Text();
+            this.pane.getChildren().add(line);
+            //Binary search to find maximum length of text, that fit in one line
+            int str = 0, end = content.length();
+            line.setText(content);
+            while(end > str + 1){
+                int mid = (str + end)/2;
+                line.setText(content.substring(0, mid + 1));
+                line.autosize();
+                if(line.getLayoutBounds().getWidth() >= super.getWidth() - padding*2.0){
+                    end = mid;
                 }
-                if(currentLineLength == lineLength){
-                    stringBuilder.append('\n');
-                    currentLineLength = 0;
+                else{
+                    str = mid;
                 }
             }
-            textPart.text.setText(stringBuilder.toString());
+            //If whole text fit in one line, then end
+            if(end == content.length()){
+                this.texts.add(line);
+                break;
+            }
+            //Divide line at position of last space
+            boolean hasSpace = false;
+            for(int i = str;i>0;i--){
+                if(content.charAt(i) == ' '){
+                    line.setText(content.substring(0,i));
+                    content = content.substring(i);
+                    hasSpace = true;
+                    break;
+                }
+            }
+            //If there was no space in line, add hyphen to end
+            if(!hasSpace){
+                line.setText(content.substring(0,str)+ "-");
+                content = content.substring(str);
+            }
+            this.texts.add(line);
+        }
+
+        double y = 2*padding;
+        for(Text text:this.texts){
+            text.autosize();
+            text.setLayoutY(y);
+            y += padding + text.getLayoutBounds().getHeight();
+            text.setLayoutX(padding);
         }
     }
 
+    @Override
+    public void resize(){
+        centre();
+    }
+
     public void addString(String key, String style, boolean translatable){
-        Text text = new Text();
-        if(translatable) {
-            text.setText(Languages.getString(key));
-        }
-        else{
-            text.setText(key);
-        }
-        text.setStyle(style);
-        this.textFlow.getChildren().add(text);
-        this.textParts.add(new TextPart(key, text, style, translatable));
+        //this.textParts.add(new TextPart(key, style, translatable));
+        this.keys.add(new Pair<>(key, translatable));
         centre();
     }
 
     public void clear(){
-        this.textFlow.getChildren().clear();
-        this.textParts.clear();
+        this.texts.forEach(text -> this.pane.getChildren().remove(text));
+        this.texts.clear();
+        this.keys.clear();
+        //this.textParts.clear();
     }
 
     public void changeLanguage(){
-        this.textFlow.getChildren().clear();
-        for(int i = 0; i < this.textParts.size(); i++){
-            Text text = new Text();
-            if(this.textParts.get(i).translatable){
-                text.setText(Languages.getString(this.textParts.get(i).key));
-            }
-            else{
-                text.setText(this.textParts.get(i).key);
-            }
-            text.setStyle(this.textParts.get(i).style);
-            this.textFlow.getChildren().add(text);
-        }
-        centre();//kvoli tomuto centre to musi byt takto
+        this.texts.forEach(text -> this.pane.getChildren().remove(text));
+        this.texts.clear();
+        centre();
     }
 
-    //todo - pridat veci tak, aby sa mohli niektore casti textu zmenit (farba, zvyraznenie, a pod)
-
-
+    /*
+    a
+    private static class TextPart{
+        String key;
+        Text text;
+        String style;
+        boolean translatable;
+        TextPart(String key, String style, boolean translatable){
+            this.key = key;
+            this.text = new Text();
+            this.text.setStyle(style);
+            this.style = style;
+            this.translatable = translatable;
+            changeLanguage();
+        }
+        void changeLanguage(){
+            if(translatable){
+                this.text.setText(Languages.getString(this.key));
+            }
+            else{
+                this.text.setText(this.key);
+            }
+        }
+    }
+    private final ArrayList<TextPart> textParts = new ArrayList<>();
+    */
 }

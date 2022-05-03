@@ -3,8 +3,9 @@ package com.example.demo2;
 import com.example.demo2.algorithmManager.*;
 import com.example.demo2.multilingualism.Languages;
 import javafx.fxml.FXML;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.HBox;
+import javafx.geometry.Insets;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
 public class HelloController {
 
@@ -30,7 +31,7 @@ public class HelloController {
         this.algorithmController.getChildren().clear();
         this.algorithmDisplay.getChildren().clear();
         if(this.algorithmManager == null){
-            this.algorithmManager = new AlgorithmManager(this.algorithmController, this.algorithmDisplay);
+            this.algorithmManager = new AlgorithmManager();
         }
         this.algorithmManager.changeAlgorithm(algorithmType);
     }
@@ -49,5 +50,5 @@ public class HelloController {
     protected void setAlgorithmToSA(){setAlgorithm(AlgorithmType.SAIntroduction);}
 
     @FXML
-    protected void setAlgorithmToWG(){setAlgorithm(AlgorithmType.WGFromBWT);}
+    protected void setAlgorithmToWG(){setAlgorithm(AlgorithmType.WG);}
 }
