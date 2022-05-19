@@ -26,7 +26,7 @@ public class SelectorDisplay extends Display{
     public SelectorDisplay(VBox container, String name, int ratio) {
         super(container, name, ratio);
         this.pane = super.getPane();
-        this.button.setText("->");//todo Change, add some picture
+        this.button.setText("\u27A4");//todo Change, to some picture
         this.header.setStyle("-fx-font-weight: bold");
         this.pane.getChildren().add(this.button);
         this.pane.getChildren().add(this.header);
@@ -79,7 +79,7 @@ public class SelectorDisplay extends Display{
             for(int i = str;i>0;i--){
                 if(description.charAt(i) == ' '){
                     line.setText(description.substring(0,i));
-                    description = description.substring(i);
+                    description = description.substring(i + 1);
                     hasSpace = true;
                     break;
                 }

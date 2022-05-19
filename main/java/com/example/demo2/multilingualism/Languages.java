@@ -3,8 +3,7 @@ package com.example.demo2.multilingualism;
 import java.util.*;
 
 public class Languages {
-
-    //pre pridanie jazyka staci pridat jeho kod (a napisat mu vlastny properties file)
+    //For adding support for new language, add its code into supportedLanguagesCodes, and write new properties file
     private static final ArrayList<String> supportedLanguagesCodes = new ArrayList<>(Arrays.asList("sk", "en"));
     private static String currentLanguage = "en";
 
@@ -29,7 +28,6 @@ public class Languages {
         }
         currentLanguage = string;
         for(LanguageListener languageListener:listeners){
-            //todo - spytat sa, ci je tento este funkcny, ak nie, tak ho zahodit. Iba ak bude, tak zmenit jazyk
             languageListener.changeOfLanguage();
         }
     }
@@ -43,8 +41,11 @@ public class Languages {
         }
         catch (MissingResourceException e){
             System.err.println(e.getMessage() + " " + string);
-            return string;//ak sa nieco zabudne, tak toto by malo byt aspon podobne
-            //tiez to vyriesi problem aj pri tych veciach, ktore tam nebudu mat nieco velmi zmysluplne (zmensi zvacsi)
+            return string;
         }
+    }
+
+    public static void clearRemovableListeners(){
+        listeners.removeIf(LanguageListener::removable);
     }
 }

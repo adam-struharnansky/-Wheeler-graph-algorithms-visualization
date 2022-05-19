@@ -3,8 +3,7 @@ package com.example.demo2.algorithms.wg;
 import com.example.demo2.algorithmDisplays.*;
 import com.example.demo2.algorithmDisplays.animatableNodes.DirectedEdge;
 import com.example.demo2.algorithmDisplays.animatableNodes.DirectedVertex;
-import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
-import com.example.demo2.algorithmDisplays.animatableNodes.Edge;
+import com.example.demo2.algorithmDisplays.DisplayType;
 import com.example.demo2.algorithmManager.AlgorithmManager;
 import com.example.demo2.algorithmManager.AlgorithmType;
 import com.example.demo2.algorithms.Algorithm;
@@ -12,6 +11,7 @@ import com.example.demo2.animations.Animation;
 import com.example.demo2.animations.AnimationManager;
 import com.example.demo2.animations.AnimationType;
 import com.example.demo2.auxiliary.Algorithms;
+import com.example.demo2.auxiliary.Colors;
 import com.example.demo2.multilingualism.LanguageListenerAdder;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -33,23 +33,26 @@ public class WGFromBWT extends Algorithm {
     private Button startButton;
     private final boolean fromTextField;
     private final Button changeButton = new Button();
-    private final Button searchButton = new Button();
+    private final Button inverseButton = new Button();
     private final Button tunnelButton = new Button();
 
     private static final int iColumn = 0;
     private static final int lfColumn = 1;
-    private static final int fColumn = 2;
-    private static final int lColumn = 3;
+    private static final int fColumn = 3;//todo - Add arrows, when going through LF-mapping in matrix
+    private static final int lColumn = 2;
 
     private final AnimationManager animationManager = new AnimationManager();
 
     private String input;
     private String lV;
-    private String fV;
     private int[] lfV;
-    private ArrayList<String> rotations;
-    private ArrayList<DirectedVertex> vertices;
-    private ArrayList<DirectedEdge> edges;
+    private final ArrayList<DirectedVertex> vertices = new ArrayList<>();
+
+    private final ArrayList<Character> l = new ArrayList<>();
+    private final ArrayList<Integer> in = new ArrayList<>();
+    private final ArrayList<Integer> out = new ArrayList<>();
+
+    private final ArrayList<Character> alphabet = new ArrayList<>();
 
     public WGFromBWT(AlgorithmManager algorithmManager) {
         super(algorithmManager);
@@ -57,13 +60,16 @@ public class WGFromBWT extends Algorithm {
 
         this.startLabel = new Label();
         LanguageListenerAdder.addLanguageListener("inputText", this.startLabel);
+        WindowManager.addController(this.startLabel, 0, 0);
+
         this.inputTextField = new TextField("abrakadabra");
-        WindowManager.addController(this.inputTextField, 0,0);
+        WindowManager.addController(this.inputTextField, 0,1);
+
         this.startButton = new Button();
         LanguageListenerAdder.addLanguageListener("start", this.startButton);
-        WindowManager.addController(this.startButton, 0,1);
-        this.fromTextField = true;
+        WindowManager.addController(this.startButton, 0,2);
 
+        this.fromTextField = true;
         this.startButton.setOnAction(actionEvent -> preStart(this.inputTextField.getText()));
     }
 
@@ -75,51 +81,51 @@ public class WGFromBWT extends Algorithm {
     }
 
     private void preStart(String input){
-
-        changeButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.WGCreation, this.vertices));
+        this.changeButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.WGCreation, this.vertices));
         LanguageListenerAdder.addLanguageListener("transformGraph", changeButton);
-        searchButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.WGSearch, this.vertices));
-        LanguageListenerAdder.addLanguageListener("searchInGraph", searchButton);
-        tunnelButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.WGTunneling, this.vertices));
+
+        this.inverseButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.WGInverse,
+                this.l, this.in, this.out));
+        LanguageListenerAdder.addLanguageListener("inverse", inverseButton);
+
+        this.tunnelButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.WGTunneling, this.vertices));
         LanguageListenerAdder.addLanguageListener("tunnelGraph", tunnelButton);
 
         this.input = (input.endsWith("$"))?input:input+"$";
+        for(int i = 0;i<this.input.length();i++){
+            if(!this.alphabet.contains(this.input.charAt(i))){
+                this.alphabet.add(this.input.charAt(i));
+            }
+        }
+        this.alphabet.sort(Comparator.naturalOrder());
+        for (int i = 0; i < this.vertices.size() + 1; i++) {
+            this.in.add(1);
+            this.out.add(1);
+        }
+        String bwt = Algorithms.bwt(this.input);
+        for (int i = 0; i < bwt.length(); i++) {
+            this.l.add(bwt.charAt(i));
+        }
         if(this.fromTextField){
+            WindowManager.removeController(this.startLabel);
             WindowManager.removeController(this.startButton);
             WindowManager.removeController(this.inputTextField);
         }
-        this.matrixDisplay.setMatrixSize(this.input.length() + 1, 4);
-        this.matrixDisplay.setRowText(0, "i", "LF[i]", "F[i]", "L[i]");
         start();
     }
 
     private void start(){
-        this.rotations = new ArrayList<>();
-        this.vertices = new ArrayList<>();
-        this.edges = new ArrayList<>();
-
-        StringBuilder start = new StringBuilder(this.input);
-        StringBuilder end = new StringBuilder();
-        for(int i = 0; i<this.input.length(); i++){
-            this.rotations.add(String.valueOf(start) + end);
-            end.append(start.charAt(0));
-            start.deleteCharAt(0);
-        }
-        rotations.sort(Comparator.naturalOrder());
-        lV = "";
-        fV = "";
-        for (String rotation : this.rotations) {
-            lV = lV + rotation.charAt(rotation.length() - 1);
-            fV = fV + rotation.charAt(0);
-        }
-        lfV = Algorithms.lfMapping(lV);
+        this.lV = Algorithms.bwt(this.input);
+        String fV = Algorithms.f(this.input);
+        this.lfV = Algorithms.lfMapping(lV);
+        this.matrixDisplay.setMatrixSize(this.input.length() + 1, 4);
+        this.matrixDisplay.setRowText(0, "i", "LF[i]", "L[i]");
         for(int i = 0;i<this.input.length();i++){
             this.matrixDisplay.setSquareText(i + 1, iColumn, i );
             this.matrixDisplay.setSquareText(i + 1, lfColumn, lfV[i]);
-            this.matrixDisplay.setSquareText(i + 1, fColumn, fV.charAt(i));
+            //this.matrixDisplay.setSquareText(i + 1, fColumn, fV.charAt(i)); todo - add with arrows
             this.matrixDisplay.setSquareText(i + 1, lColumn, lV.charAt(i));
         }
-
         for(int i = 0; i<this.input.length();i++){
             DirectedVertex vertex = (DirectedVertex) this.graphDisplay.addVertex();
             vertex.setRelativePosition(0.4*Math.cos((2*Math.PI/this.input.length())*i) + 0.5,
@@ -127,7 +133,6 @@ public class WGFromBWT extends Algorithm {
             vertex.setValue(i);
             this.vertices.add(vertex);
         }
-
         super.addNextBackAnimateControls(0,1,0,0,0,2);
         super.backStepButton.setDisable(true);
     }
@@ -136,32 +141,30 @@ public class WGFromBWT extends Algorithm {
     private int highestStep = 0;
     private int it = 0;
     private int endInt = -1;
+
     @Override
     protected void nextStep(boolean animate){
         Animation animation = this.animationManager.getAnimation(step);
-
         if(highestStep == step) {
             this.matrixDisplay.unhighlightEverything(animation);
             this.matrixDisplay.clearMatrixArrows(animation);
-
-            int jt = lfV[it];
-
-            this.matrixDisplay.highlightBackground(animation, it + 1, iColumn);
-            this.matrixDisplay.highlightBackground(animation, it + 1, lfColumn);
-            this.matrixDisplay.highlightBackground(animation, it + 1, lColumn);
-
-            DirectedEdge edge = (DirectedEdge) this.graphDisplay.addEdge(this.vertices.get(it), this.vertices.get(jt));
-            edge.setText(lV.charAt(it));
-            animation.addAnimatable(AnimationType.AppearAnimation, edge);
-            if (lV.charAt(it) == '$') {
+            if (step == this.input.length()) {
                 endInt = step;
-                end();
             }
-            it = jt;
+            else {
+                int jt = lfV[it];
+                this.matrixDisplay.highlightBackground(animation, it + 1, iColumn);
+                this.matrixDisplay.highlightBackground(animation, it + 1, lfColumn);
+                this.matrixDisplay.highlightBackground(animation, it + 1, lColumn);
+                DirectedEdge edge = (DirectedEdge) this.graphDisplay.addEdge(this.vertices.get(it), this.vertices.get(jt));
+                edge.setText(lV.charAt(it));
+                edge.setColor(Colors.getColor(this.alphabet.indexOf(lV.charAt(it))));
+                animation.addAnimatable(AnimationType.AppearAnimation, edge);
+                it = jt;
+            }
         }
-
         if(animate){
-            animationManager.executeAnimation(step, true);
+            this.animationManager.executeAnimation(step, true);
         }
         else{
             animation.setForward(true);
@@ -172,7 +175,6 @@ public class WGFromBWT extends Algorithm {
         }
         step++;
         highestStep = Math.max(highestStep, step);
-
         super.backStepButton.setDisable(false);
     }
 
@@ -190,24 +192,19 @@ public class WGFromBWT extends Algorithm {
             super.backStepButton.setDisable(true);
         }
         super.nextStepButton.setDisable(false);
-        changeButton.setDisable(true);
-        searchButton.setDisable(true);
-        tunnelButton.setDisable(true);
+        this.changeButton.setDisable(true);
+        this.inverseButton.setDisable(true);
+        this.tunnelButton.setDisable(true);
     }
 
     private void end(){
         super.nextStepButton.setDisable(true);
 
-        for(DirectedVertex vertex:this.vertices){
-            for(Edge edge:vertex.getOutgoing()){
-                System.out.println(edge.getText());
-            }
-        }
         changeButton.setDisable(false);
         WindowManager.addController(changeButton, 1, 0);
 
-        searchButton.setDisable(false);
-        WindowManager.addController(searchButton, 1, 1);
+        inverseButton.setDisable(false);
+        WindowManager.addController(inverseButton, 1, 1);
 
         tunnelButton.setDisable(false);
         WindowManager.addController(tunnelButton, 1, 2);

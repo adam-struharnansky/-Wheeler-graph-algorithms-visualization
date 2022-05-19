@@ -1,8 +1,6 @@
 package com.example.demo2;
 
 import com.example.demo2.algorithmDisplays.WindowManager;
-import com.example.demo2.auxiliary.Algorithms;
-import com.example.demo2.auxiliary.Auxiliary;
 import com.example.demo2.multilingualism.LanguageListenerAdder;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -16,7 +14,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class HelloApplication extends Application {
 
@@ -24,12 +21,12 @@ public class HelloApplication extends Application {
     private static final double startingWidth = 1000;
 
     private void addingObjectWithTextToLanguageListener(VBox vBox){
-        //todo - urobit to skor ako trochu zlozitejsie fifo, toto moze ist iba do hlbky 1
-        MenuBar menuBar = (MenuBar) vBox.getChildren().get(0);
+        MenuBar menuBar = (MenuBar) ((VBox) vBox.getChildren().get(0)).getChildren().get(0);
+        //todo - Add LanguageListener also for submenus, sub-submenus, etc...
         for(Menu menu:menuBar.getMenus()){
-            LanguageListenerAdder.addLanguageListener(menu.getText(), menu);
+            LanguageListenerAdder.addLanguageListener(menu.getText(), menu, false);
             for(MenuItem menuItem: menu.getItems()){
-                LanguageListenerAdder.addLanguageListener(menuItem.getText(), menuItem);
+                LanguageListenerAdder.addLanguageListener(menuItem.getText(), menuItem, false);
             }
         }
         ((HBox) vBox.getChildren().get(1)).setFillHeight(true);
@@ -42,24 +39,25 @@ public class HelloApplication extends Application {
         addingObjectWithTextToLanguageListener(vBox);
         Scene scene = new Scene(vBox, startingWidth, startingHeight);
 
-        stage.setTitle("Wheeler graphs");//todo zmenit - podla toho, aky nazov to bude mat nakoniec
+        stage.setTitle("Wheeler graphs");//todo zmenit podla toho, aky nazov to bude mat nakoniec
         stage.setScene(scene);
         stage.show();
 
-        WindowManager.setHBox((HBox) vBox.getChildren().get(1));
-        WindowManager.setControllerPane((Pane) vBox.getChildren().get(2));
+        WindowManager.setDisplayHBox((HBox) vBox.getChildren().get(1));
 
-        BackgroundFill backgroundFill =
-                new BackgroundFill(
-                        Color.LIGHTGRAY,
-                        new CornerRadii(5),
-                        new Insets(5)
-                );
+        Pane controllerPane = (Pane) vBox.getChildren().get(2);
+        BackgroundFill controllerBackgroundFill = new BackgroundFill(
+                        Color.LIGHTGRAY, new CornerRadii(5), new Insets(5));
+        Background controllerBackground = new Background(controllerBackgroundFill);
+        controllerPane.setBackground(controllerBackground);
+        WindowManager.setControllerPane(controllerPane);
 
-        Background background =
-                new Background(backgroundFill);
-
-        ((Pane) vBox.getChildren().get(2)).setBackground(background);
+        Pane algorithmNamePane = ((Pane)((VBox) vBox.getChildren().get(0)).getChildren().get(1));
+        BackgroundFill nameBackgroundFill = new BackgroundFill(
+                Color.LIGHTGRAY, new CornerRadii(5), new Insets(5));
+        Background nameBackground = new Background(nameBackgroundFill);
+        algorithmNamePane.setBackground(nameBackground);
+        WindowManager.setAlgorithmNamePane(algorithmNamePane);
 
         scene.heightProperty().addListener((observableValue, number, t1) -> WindowManager.changeHeight(t1.doubleValue()));
         scene.widthProperty().addListener((observableValue, number, t1) -> WindowManager.changeWidth(t1.doubleValue()));
@@ -67,22 +65,11 @@ public class HelloApplication extends Application {
         WindowManager.changeHeight(startingHeight);
         WindowManager.changeWidth(startingWidth);
     }
-
     public static void main(String[] args) {
-        //test();
+        test();
         launch();
     }
 
     static void test(){
-        System.out.println(Arrays.toString(Algorithms.suffixArray("banana")));
-        System.out.println();
-        System.out.println(Arrays.toString(Algorithms.suffixArray("abracadabra")));
-        System.out.println();
-        System.out.println(Arrays.toString(Algorithms.suffixArray("abrakadabra")));
-        System.out.println();
-        System.out.println(Arrays.toString(Algorithms.suffixArray("abcdefgh")));
-        System.out.println();
-        System.out.println(Arrays.toString(Algorithms.suffixArray("hgfedcba")));
-        System.out.println();
     }
 }

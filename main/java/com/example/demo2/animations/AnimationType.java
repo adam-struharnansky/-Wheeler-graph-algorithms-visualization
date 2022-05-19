@@ -5,5 +5,7 @@ public enum AnimationType {
     MoveAnimation,
     RelativeMoveAnimation,
     AppearAnimation,
-    DisappearAnimation
+    DisappearAnimation,
+    SuddenlyAppearAnimation,
+    SuddenlyDisappearAnimation
 }

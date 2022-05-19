@@ -1,17 +1,14 @@
 package com.example.demo2.algorithms.wg;
 
-import com.example.demo2.algorithmDisplays.TextDisplay;
-import com.example.demo2.algorithmDisplays.WindowManager;
-import com.example.demo2.algorithmDisplays.GraphDisplay;
-import com.example.demo2.algorithmDisplays.animatableNodes.DirectedVertex;
-import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
-import com.example.demo2.algorithmDisplays.animatableNodes.Edge;
-import com.example.demo2.algorithmDisplays.animatableNodes.Vertex;
+import com.example.demo2.algorithmDisplays.*;
+import com.example.demo2.algorithmDisplays.animatableNodes.*;
+import com.example.demo2.algorithmDisplays.DisplayType;
 import com.example.demo2.algorithmManager.AlgorithmManager;
 import com.example.demo2.algorithmManager.AlgorithmType;
 import com.example.demo2.algorithms.Algorithm;
 import com.example.demo2.animations.Animation;
 import com.example.demo2.animations.AnimationType;
+import com.example.demo2.auxiliary.Colors;
 import com.example.demo2.multilingualism.LanguageListenerAdder;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -24,26 +21,36 @@ import java.util.Random;
 
 public class WGCreation extends Algorithm {
 
-    private final GraphDisplay graphDisplay;
-    private final TextDisplay textDisplay; //- kde bude ulozene, ako je vhodne ulozeny?
+    private final GraphDisplay graphDisplay
+            = (GraphDisplay) WindowManager.addDisplay(DisplayType.DirectedGraph, "?", 4);;
+    private final MatrixDisplay matrixDisplay
+            = (MatrixDisplay) WindowManager.addDisplay(DisplayType.Matrix, "succinctRepresentation", 1);
+    private final SimpleGraphDisplay doubleGraph
+            = (SimpleGraphDisplay) WindowManager.addDisplay(DisplayType.SimpleDirectedGraph, "?", 1);
+    private final TextDisplay textDisplay
+            = (TextDisplay) WindowManager.addDisplay(DisplayType.Text, "?", 1);
+
     private final ArrayList<DirectedVertex> vertices = new ArrayList<>();
     private final ArrayList<Edge> edges = new ArrayList<>();
 
+    private final ArrayList<SimpleVertex> simpleVerticesFrom = new ArrayList<>();
+    private final ArrayList<SimpleVertex> simpleVerticesTo = new ArrayList<>();
+    private final ArrayList<SimpleDirectedEdge> doubleGraphEdges = new ArrayList<>();
+    private double doubleGraphVertexRadius = 15.0;
+
     private final Animation animation = new Animation();
+
+    private final ArrayList<String> edgesValues = new ArrayList<>();
 
     public WGCreation(AlgorithmManager algorithmManager) {
         super(algorithmManager);
-        this.graphDisplay = (GraphDisplay) WindowManager.addDisplay(DisplayType.DirectedGraph, "", 4);
-        this.textDisplay = (TextDisplay) WindowManager.addDisplay(DisplayType.Text, "succinctRepresentation", 1);
-
         addButtons(algorithmManager);
     }
 
     public WGCreation(AlgorithmManager algorithmManager, ArrayList<DirectedVertex> vertices){
         super(algorithmManager);
-        this.graphDisplay = (GraphDisplay) WindowManager.addDisplay(DisplayType.DirectedGraph, "", 4);
-        this.textDisplay = (TextDisplay) WindowManager.addDisplay(DisplayType.Text, "succinctRepresentation", 1);
 
+        //todo pridat vrcholy aj do simpleVertices
         for(DirectedVertex oldVertex:vertices){
             DirectedVertex vertex = (DirectedVertex) this.graphDisplay.addVertex();
             vertex.setValue(oldVertex.getValue());
@@ -139,7 +146,8 @@ public class WGCreation extends Algorithm {
     }
 
     public void rewriteSuccinctRepresentation(){
-        this.textDisplay.clear();
+        this.matrixDisplay.clearMatrixTexts();
+        this.matrixDisplay.setMatrixSize(this.edges.size()+2, 5);
         boolean correctForm = true;
         for(DirectedVertex vertex:this.vertices){
             if(vertex.getIncoming().isEmpty() || vertex.getOutgoing().isEmpty()){
@@ -148,11 +156,13 @@ public class WGCreation extends Algorithm {
             }
         }
         if(correctForm){
+            this.matrixDisplay.setRowText(0, "i", "L[i]", "out[i]", "in[i]", "F[i]");
+            this.matrixDisplay.setSquareTextColor(0, 4, Color.GRAY);
             StringBuilder l = new StringBuilder();
             StringBuilder out = new StringBuilder();
             StringBuilder in = new StringBuilder();
             StringBuilder f = new StringBuilder();
-            for(int i = 1;i<=this.vertices.size();i++){
+            for(int i = 0;i<this.vertices.size();i++){
                 for(DirectedVertex vertex:this.vertices){
                     if(vertex.getValue().compareTo(i+"") == 0){
                         out.append(1);
@@ -172,22 +182,39 @@ public class WGCreation extends Algorithm {
                     }
                 }
             }
-            this.textDisplay.addString("L: "+l+"\n","", false);
-            this.textDisplay.addString("O: "+out+"\n","", false);
-            this.textDisplay.addString("I: "+in+"\n","", false);
-            this.textDisplay.addString("F: "+f+"\n","", false);
+            String lString = l.toString();
+            String outString = out.toString();
+            String inString = in.toString();
+            String fString = f.toString();
+            System.out.println(l);
+            System.out.println(out);
+            System.out.println(in);
+            System.out.println(f);
+            for(int i = 0;i<this.edges.size();i++){
+                this.matrixDisplay.setSquareText(i + 1, 0, i);
+                this.matrixDisplay.setSquareText(i + 1, 1, lString.charAt(i));
+                this.matrixDisplay.setSquareText(i + 1, 2, outString.charAt(i));
+                this.matrixDisplay.setSquareText(i + 1, 3, inString.charAt(i));
+                this.matrixDisplay.setSquareText(i + 1, 4, fString.charAt(i));
+                this.matrixDisplay.setSquareTextColor(i + 1, 4, Color.GRAY);
+
+            }
+            this.matrixDisplay.setSquareText(this.edges.size() + 1, 2, "1");
+            this.matrixDisplay.setSquareText(this.edges.size() + 1, 3, "1");
         }
         else{
-            //todo - asi to dat do text displayu, kde sa to da dat do riadkov, a nebude to treba prekladat
-            this.textDisplay.addString("vertexWithNoIncomingOrOutgoingEdgesExists", "", true);
+            //todo - neda sa to zobrazit
+            System.out.println("neda sa");
         }
+        System.out.println();
+        System.out.println("-------");
     }
 
     public void addVertex(boolean animate){
         this.animation.endAnimation();
         this.animation.clear();
         for(Vertex vertex:this.vertices){
-            if(vertex.getValue().compareTo(vertices.size()+"") == 0){//toto by namalo nikdy nastat
+            if(vertex.getValue().compareTo(vertices.size()+"") == 0){//This should never happen
                 this.animation.addAnimatable(AnimationType.ColorAnimation, vertex, Color.RED, Color.AQUA);
                 this.animation.startAnimation();
                 //todo - vypisat, ze sa rovnaju
@@ -200,23 +227,53 @@ public class WGCreation extends Algorithm {
         vertex.setRelativePosition(0.5 + random.nextDouble()/8,0.5 + random.nextDouble()/8);
         this.vertices.add(vertex);
         this.animation.addAnimatable(AnimationType.AppearAnimation, vertex);
+
         this.graphDisplay.beautify(animation);
+
+        SimpleVertex simpleVertexFrom = this.doubleGraph.addSimpleVertex();
+        simpleVertexFrom.setValue(simpleVerticesFrom.size());
+        simpleVertexFrom.setRelativePosition(0.1,0.9);
+        simpleVertexFrom.setRadius(this.doubleGraphVertexRadius);
+        this.animation.addAnimatable(AnimationType.AppearAnimation, simpleVertexFrom);
+        this.simpleVerticesFrom.add(simpleVertexFrom);
+
+        SimpleVertex simpleVertexTo = this.doubleGraph.addSimpleVertex();
+        simpleVertexTo.setValue(simpleVerticesTo.size());
+        simpleVertexTo.setRelativePosition(0.9,0.9);
+        simpleVertexTo.setRadius(this.doubleGraphVertexRadius);
+        this.animation.addAnimatable(AnimationType.AppearAnimation, simpleVertexTo);
+        this.simpleVerticesTo.add(simpleVertexTo);
+
+        double newDoubleGraphVertexRadius = this.doubleGraphVertexRadius;
+        if(this.doubleGraph.getHeight()*0.8 < this.simpleVerticesFrom.size()*this.doubleGraphVertexRadius){
+            newDoubleGraphVertexRadius = this.doubleGraphVertexRadius*0.9;
+        }
+        newDoubleGraphVertexRadius = Math.max(newDoubleGraphVertexRadius, 7.0);
+
+        for(int i = 0;i<this.simpleVerticesFrom.size();i++){
+            if(newDoubleGraphVertexRadius != this.doubleGraphVertexRadius){
+                this.simpleVerticesFrom.get(i).setRadius(newDoubleGraphVertexRadius);
+                this.simpleVerticesTo.get(i).setRadius(newDoubleGraphVertexRadius);
+            }
+            animation.addAnimatable(AnimationType.RelativeMoveAnimation, this.simpleVerticesFrom.get(i), 0.1, 0.08 + i*(1.0/(this.simpleVerticesFrom.size() + 1)));
+            animation.addAnimatable(AnimationType.RelativeMoveAnimation, this.simpleVerticesTo.get(i), 0.9, 0.08 + i*(1.0/(this.simpleVerticesFrom.size() + 1)));
+        }
+        this.doubleGraphVertexRadius = newDoubleGraphVertexRadius;
+
         if(animate) {
             this.animation.startAnimation();
         }
         else {
             this.animation.endAnimation();
         }
+
+
         rewriteSuccinctRepresentation();
     }
 
     public void addEdge(String value, String from, String to, boolean animate){
         this.animation.endAnimation();
         this.animation.clear();
-        if(from.compareTo(to) == 0){
-            //todo - dorobit slucky
-            return;
-        }
         Vertex vertexFrom = null, vertexTo = null;
         for(Vertex vertex:this.vertices){
             if(vertex.getValue().compareTo(from) == 0){
@@ -227,12 +284,51 @@ public class WGCreation extends Algorithm {
             }
         }
         if(vertexFrom != null && vertexTo != null){
+
             Edge edge = graphDisplay.addEdge(vertexFrom, vertexTo);
             edge.setText(value);
             this.edges.add(edge);
             this.animation.addAnimatable(AnimationType.AppearAnimation, edge);
-            this.graphDisplay.beautify(animation);
-            this.animation.startAnimation();
+            //this.graphDisplay.beautify(animation);
+
+            //This should be safe, because the doubleGraph has same vertices
+            SimpleDirectedEdge simpleEdge = (SimpleDirectedEdge) doubleGraph.addSimpleEdge(
+                    this.simpleVerticesFrom.get(Integer.parseInt(from)), this.simpleVerticesTo.get(Integer.parseInt(to)));
+            this.doubleGraphEdges.add(simpleEdge);
+            this.animation.addAnimatable(AnimationType.AppearAnimation, simpleEdge);
+
+            boolean containedValue = false;
+            for(int i = 0;i<this.edgesValues.size();i++){
+                if(this.edgesValues.get(i).compareTo(value) == 0){
+                    edge.setColor(Colors.getColor(i));
+                    simpleEdge.setColor(Colors.getColor(i));
+                    containedValue = true;
+                    break;
+                }
+            }
+            if(!containedValue) {
+                edge.setColor(Colors.getColor(this.edgesValues.size()));
+                simpleEdge.setColor(Colors.getColor(this.edgesValues.size()));
+                this.edgesValues.add(value);
+            }
+
+            int multipleEdge = 0;
+            for(Edge edgeI : this.edges){
+                if(edgeI.getVertexTo() == vertexTo && edgeI.getVertexFrom() == vertexFrom){
+                    multipleEdge++;
+                }
+            }
+
+            if(multipleEdge > 1){
+                simpleEdge.setText(multipleEdge+"x");
+            }
+
+            if(animate){
+                this.animation.startAnimation();
+            }
+            else{
+                this.animation.endAnimation();
+            }
             rewriteSuccinctRepresentation();
         }
     }
@@ -240,39 +336,50 @@ public class WGCreation extends Algorithm {
     public boolean checkWheelerGraph(){
         this.animation.endAnimation();
         this.animation.clear();
-        for(int i = 0;i<this.edges.size();i++){
-            for(int j = i+1;j<this.edges.size();j++){
-                int cmpE = this.edges.get(i).getText().compareTo(this.edges.get(j).getText());
-                int cmpU = Integer.compare(Integer.parseInt(this.edges.get(i).getVertexFrom().getValue()),
-                        Integer.parseInt(this.edges.get(j).getVertexFrom().getValue()));
-                int cmpV = Integer.compare(Integer.parseInt(this.edges.get(i).getVertexTo().getValue()),
-                        Integer.parseInt(this.edges.get(j).getVertexTo().getValue()));
+        boolean isWheelerGraph = true;
+
+        for(Edge edge0:this.edges){
+            for(Edge edge1:this.edges){
+                int cmpE = edge0.getText().compareTo(edge1.getText());
+                int cmpU = Integer.compare(Integer.parseInt(edge0.getVertexFrom().getValue()),
+                        Integer.parseInt(edge1.getVertexFrom().getValue()));
+                int cmpV = Integer.compare(Integer.parseInt(edge0.getVertexTo().getValue()),
+                        Integer.parseInt(edge1.getVertexTo().getValue()));
                 boolean correctPair = true;
                 if(cmpE < 0 && cmpV > 0){
                     correctPair = false;
                 }
-                else if(cmpE > 0 && cmpV < 0){
+                if(cmpE == 0 && cmpU < 0 && cmpV > 0){
                     correctPair = false;
                 }
-                else if(cmpE == 0 && cmpV < 0 && cmpU > 0){
-                    correctPair = false;
-                }
-                else if(cmpE == 0 && cmpV > 0 && cmpU < 0){
-                    correctPair = false;
-                }
+
                 if(!correctPair){
-                    this.animation.addAnimatable(AnimationType.ColorAnimation, edges.get(i), Color.RED, Color.BLACK);
-                    this.animation.addAnimatable(AnimationType.ColorAnimation, edges.get(j), Color.RED, Color.BLACK);
-                    this.animation.addAnimatable(AnimationType.ColorAnimation, edges.get(i).getVertexFrom(), Color.RED, Color.AQUA);
-                    this.animation.addAnimatable(AnimationType.ColorAnimation, edges.get(i).getVertexTo(), Color.RED, Color.AQUA);
-                    this.animation.addAnimatable(AnimationType.ColorAnimation, edges.get(j).getVertexFrom(), Color.RED, Color.AQUA);
-                    this.animation.addAnimatable(AnimationType.ColorAnimation, edges.get(j).getVertexTo(), Color.RED, Color.AQUA);
-                    this.animation.startAnimation();
-                    return false;
+                    this.animation.addAnimatable(AnimationType.ColorAnimation, edge0, Color.RED, edge0.getColor());
+                    this.animation.addAnimatable(AnimationType.ColorAnimation, edge1, Color.RED, edge1.getColor());
+                    this.animation.addAnimatable(AnimationType.ColorAnimation, edge0.getVertexFrom(), Color.RED, Color.AQUA);
+                    this.animation.addAnimatable(AnimationType.ColorAnimation, edge0.getVertexTo(), Color.RED, Color.AQUA);
+                    this.animation.addAnimatable(AnimationType.ColorAnimation, edge1.getVertexFrom(), Color.RED, Color.AQUA);
+                    this.animation.addAnimatable(AnimationType.ColorAnimation, edge1.getVertexTo(), Color.RED, Color.AQUA);
+
+                    for(SimpleDirectedEdge sde:this.doubleGraphEdges){
+                        if(sde.vertexFrom().getValue().compareTo(edge0.getVertexFrom().getValue()) == 0 &&
+                        sde.vertexTo().getValue().compareTo(edge0.getVertexTo().getValue()) == 0){
+                            this.animation.addAnimatable(AnimationType.ColorAnimation, sde, Color.RED, sde.getColor());
+                        }
+                        else if(sde.vertexFrom().getValue().compareTo(edge1.getVertexFrom().getValue()) == 0 &&
+                                sde.vertexTo().getValue().compareTo(edge1.getVertexTo().getValue()) == 0){
+                            this.animation.addAnimatable(AnimationType.ColorAnimation, sde, Color.RED, sde.getColor());
+                        }
+                    }
+                    isWheelerGraph = false;
+
                 }
             }
         }
-        return true;
+        if(!isWheelerGraph){
+            this.animation.startAnimation();
+        }
+        return isWheelerGraph;
     }
 
 

@@ -13,5 +13,6 @@ public enum AlgorithmType {
     WG,
     WGFromBWT,
     WGTunneling,
-    WGSearch
+    WGSearch,
+    WGInverse
 }

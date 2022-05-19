@@ -1,20 +1,23 @@
 package com.example.demo2.algorithmDisplays;
 
-import com.example.demo2.algorithmDisplays.animatableNodes.*;
+import com.example.demo2.algorithmDisplays.animatableNodes.Edge;
+import com.example.demo2.algorithmDisplays.animatableNodes.GraphNodesFactory;
+import com.example.demo2.algorithmDisplays.animatableNodes.Vertex;
 import com.example.demo2.animations.Animation;
 import com.example.demo2.animations.AnimationType;
 import com.example.demo2.auxiliary.AuxiliaryMath;
-import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 public class GraphDisplay extends Display{
+
+    //todo - Add un/zoom
 
     private final GraphNodesFactory graphNodesFactory;
     private boolean directed;
@@ -39,8 +42,6 @@ public class GraphDisplay extends Display{
 
     @Override
     public void centre(){
-        //todo - nastavit, aby sa zmenil zoom na pociatocny
-        //todo - mozno aj niekde pouzit zoom
         double mostLeft = Double.POSITIVE_INFINITY, mostRight = Double.NEGATIVE_INFINITY,
                 mostTop = Double.POSITIVE_INFINITY, mostDown = Double.NEGATIVE_INFINITY;
         for(Vertex vertex:this.visibleVertices){
@@ -68,91 +69,25 @@ public class GraphDisplay extends Display{
     }
 
     public void beautify(){
-        HashMap<Vertex, double[]> positions = new HashMap<>();
-        for(Vertex vertex:this.vertices){
-            positions.put(vertex, new double[]{vertex.getRelativeX(), vertex.getRelativeY()});
-        }
-        Random random = new Random();
-        int stepsNumber = 150;
-        double q = 0.0075;//magneticky naboj = zdroj odpudivej sily
-        double g = 0.0001;//pseudo-gravitacna sila
-        double k = 0.02;//tuhost hran
-        double w = 0.003;//nahodny pohyb
-        for(int i = 0;i<stepsNumber;i++){
-            //kazdy vrchol je nahodne pohnuty
-            positions.forEach(((vertex, position) -> {
-                position[0] += (0.5 - random.nextDouble())*w;
-                position[1] += (0.5 - random.nextDouble())*w;
-            }));
+        beautify(150);
+    }
 
-            //zabezpecit, aby to stale bolo vnutri
-            positions.forEach(((vertex, position) -> {
-                position[0] = Math.max(0.0, position[0]);
-                position[0] = Math.min(1.0, position[0]);
-                position[1] = Math.max(0.0, position[1]);
-                position[1] = Math.min(1.0, position[1]);
-            }));
-
-            for(int m = 0;m<positions.size();m++){
-                for(int n = m;n<positions.size(); n++){
-                    //kazdu dvojicu vrcholov navzajom oddialit pomocou coulumbovho zakona
-                    Pair<Double, Double> mnVector = new Pair<>(
-                            positions.get(vertices.get(n))[0] - positions.get(vertices.get(m))[0],
-                            positions.get(vertices.get(n))[1] - positions.get(vertices.get(m))[1]);
-                    double r = Math.max(0.0001, AuxiliaryMath.vectorSize(mnVector));
-                    double f = (q*q)/(r*r);
-                    Pair<Double, Double> unitMN = new Pair<>(mnVector.getKey()/r, mnVector.getValue()/r);
-                    positions.get(vertices.get(m))[0] -= f*unitMN.getKey();
-                    positions.get(vertices.get(m))[1] -= f*unitMN.getValue();
-                    positions.get(vertices.get(n))[0] += f*unitMN.getKey();
-                    positions.get(vertices.get(n))[1] += f*unitMN.getValue();
-                    //kazda dvojica je priblizena, ale iba linearne, pre vsetky dvojice ide o rovnaku vzdialenost
-                    positions.get(vertices.get(m))[0] += g*unitMN.getKey();
-                    positions.get(vertices.get(m))[1] += g*unitMN.getValue();
-                    positions.get(vertices.get(n))[0] -= g*unitMN.getKey();
-                    positions.get(vertices.get(n))[1] -= g*unitMN.getValue();
-                }
-            }
-
-            //zabezpecit, aby to stale bolo vnutri
-            positions.forEach(((vertex, position) -> {
-                position[0] = Math.max(0.0, position[0]);
-                position[0] = Math.min(1.0, position[0]);
-                position[1] = Math.max(0.0, position[1]);
-                position[1] = Math.min(1.0, position[1]);
-            }));
-
-            //kazdy dvojicu susednych vrcholov priblizit pomocou hooka
-            for(Edge edge:this.edges){
-                Pair<Double, Double> vector = new Pair<>(
-                        positions.get(edge.getVertexTo())[0] - positions.get(edge.getVertexFrom())[0],
-                        positions.get(edge.getVertexTo())[1] - positions.get(edge.getVertexFrom())[1]);
-                double r = AuxiliaryMath.vectorSize(vector);
-                double f = k*r;
-                positions.get(edge.getVertexFrom())[0] += f*vector.getKey();
-                positions.get(edge.getVertexFrom())[1] += f*vector.getValue();
-                positions.get(edge.getVertexTo())[0] -= f*vector.getKey();
-                positions.get(edge.getVertexTo())[1] -= f*vector.getValue();
-            }
-
-            //zabezpecit, aby to stale bolo vnutri
-            positions.forEach(((vertex, position) -> {
-                position[0] = Math.max(0.0, position[0]);
-                position[0] = Math.min(1.0, position[0]);
-                position[1] = Math.max(0.0, position[1]);
-                position[1] = Math.min(1.0, position[1]);
-            }));
-        }
-        positions.forEach(((vertex, position) -> vertex.setRelativePosition(position[0], position[1])));
+    public void beautify(int stepsNumber){
+        Animation animation = new Animation();
+        beautify(animation, stepsNumber);
+        animation.endAnimation();
     }
 
     public void beautify(Animation animation){
+        beautify(animation, 150);
+    }
+
+    public void beautify(Animation animation, int stepsNumber){
         HashMap<Vertex, double[]> positions = new HashMap<>();
         for(Vertex vertex:this.vertices){
             positions.put(vertex, new double[]{vertex.getRelativeX(), vertex.getRelativeY()});
         }
         Random random = new Random();
-        int stepsNumber = 150;
         double q = 0.0075;//magneticky naboj = zdroj odpudivej sily
         double g = 0.0001;//pseudo-gravitacna sila
         double k = 0.02;//tuhost hran
@@ -207,11 +142,11 @@ public class GraphDisplay extends Display{
                         positions.get(edge.getVertexTo())[0] - positions.get(edge.getVertexFrom())[0],
                         positions.get(edge.getVertexTo())[1] - positions.get(edge.getVertexFrom())[1]);
                 double r = AuxiliaryMath.vectorSize(vector);
-                double f = k*r;
-                positions.get(edge.getVertexFrom())[0] += f*vector.getKey();
-                positions.get(edge.getVertexFrom())[1] += f*vector.getValue();
-                positions.get(edge.getVertexTo())[0] -= f*vector.getKey();
-                positions.get(edge.getVertexTo())[1] -= f*vector.getValue();
+                double f = k * r * edge.getOpacity() * edge.getOpacity();//Opaque edges have smaller force
+                positions.get(edge.getVertexFrom())[0] += f * vector.getKey();
+                positions.get(edge.getVertexFrom())[1] += f * vector.getValue();
+                positions.get(edge.getVertexTo())[0] -= f * vector.getKey();
+                positions.get(edge.getVertexTo())[1] -= f * vector.getValue();
             }
 
             //zabezpecit, aby to stale bolo vnutri
@@ -230,19 +165,11 @@ public class GraphDisplay extends Display{
     public void resize() {
         this.vertices.forEach(Vertex::redraw);
     }
-/*
-todo vyriesit to, ze sa neresizuje graphdisplay
 
-    @Override
-    public double getWidth(){
-        return pane.getWidth();
+    public ArrayList<Edge> getEdges(){
+        return this.edges;
     }
 
-    @Override
-    public double getHeight(){
-        return pane.getHeight();
-    }
-*/
     public double getVertexRadius(){
         return this.vertexRadius;
     }
@@ -258,8 +185,16 @@ todo vyriesit to, ze sa neresizuje graphdisplay
         if(this.invisibleVertices.contains(vertex)){
             this.visibleVertices.add(vertex);
             this.invisibleVertices.remove(vertex);
-            //todo - treba mu dat niekde miesto asi
         }
+    }
+
+    public void addEdge(Edge edge){
+        this.edges.add(edge);
+    }
+
+    public void addVertex(Vertex vertex){
+        this.vertices.add(vertex);
+        this.visibleVertices.add(vertex);
     }
 
     public Vertex addVertex(){
@@ -294,4 +229,26 @@ todo vyriesit to, ze sa neresizuje graphdisplay
         this.edges.forEach(this::removeEdge);
         this.vertices.forEach(this::removeVertex);
     }
+
+    public void setBeautifyDisable(boolean disable){
+        super.setDisable("beautify", disable);
+    }
+
+    public void setCenterDisable(boolean disable){
+        super.setDisable("centre", disable);
+    }
+
+    private final HashSet<Vertex> highlightedVertices = new HashSet<>();
+    private final HashSet<Edge> highlightedEdges = new HashSet<>();
+
+    public void highlightVertex(Vertex vertex){
+        vertex.highlight();
+        this.highlightedVertices.add(vertex);
+    }
+
+    public void unhighlightEverything(){
+        this.highlightedVertices.forEach(Vertex::unhighlight);
+        this.highlightedVertices.clear();
+    }
+
 }

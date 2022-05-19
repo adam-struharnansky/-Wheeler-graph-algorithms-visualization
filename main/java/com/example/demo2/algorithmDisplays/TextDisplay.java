@@ -43,6 +43,7 @@ public class TextDisplay extends Display{
             else{
                 stringBuilder.append(pair.getKey());
             }
+            stringBuilder.append(" ");
         });
 
         String content = stringBuilder.toString();
@@ -73,7 +74,7 @@ public class TextDisplay extends Display{
             for(int i = str;i>0;i--){
                 if(content.charAt(i) == ' '){
                     line.setText(content.substring(0,i));
-                    content = content.substring(i);
+                    content = content.substring(i + 1);
                     hasSpace = true;
                     break;
                 }
@@ -101,7 +102,7 @@ public class TextDisplay extends Display{
     }
 
     public void addString(String key, String style, boolean translatable){
-        //this.textParts.add(new TextPart(key, style, translatable));
+        //for styles this.textParts.add(new TextPart(key, style, translatable));
         this.keys.add(new Pair<>(key, translatable));
         centre();
     }
@@ -110,7 +111,7 @@ public class TextDisplay extends Display{
         this.texts.forEach(text -> this.pane.getChildren().remove(text));
         this.texts.clear();
         this.keys.clear();
-        //this.textParts.clear();
+        //for styles this.textParts.clear();
     }
 
     public void changeLanguage(){
@@ -120,7 +121,7 @@ public class TextDisplay extends Display{
     }
 
     /*
-    a
+    for styles
     private static class TextPart{
         String key;
         Text text;

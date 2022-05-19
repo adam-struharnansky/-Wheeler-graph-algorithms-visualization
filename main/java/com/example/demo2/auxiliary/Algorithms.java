@@ -3,6 +3,7 @@ package com.example.demo2.auxiliary;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 
 public class Algorithms {
@@ -24,14 +25,13 @@ public class Algorithms {
     public static String bwt(String input){
         input = (input.endsWith("$"))?input: input + "$";
         ArrayList<String> rotations = new ArrayList<>();
-        StringBuilder str = new StringBuilder(input);
+        StringBuilder start = new StringBuilder(input);
         StringBuilder end = new StringBuilder();
-        for(int i = 0;i<input.length();i++){
-            str.deleteCharAt(0);
-            end.insert(0, input.charAt(i));
-            rotations.add(str.toString() + end);
+        for(int i = 0; i<input.length(); i++){
+            rotations.add(String.valueOf(start) + end);
+            end.append(start.charAt(0));
+            start.deleteCharAt(0);
         }
-        System.out.println(rotations);
         rotations.sort(Comparator.naturalOrder());
         StringBuilder result = new StringBuilder();
         for(String rotation:rotations){
@@ -42,7 +42,6 @@ public class Algorithms {
 
     public static int[] lfMapping(String input){
         int[] output = new int[input.length()];
-
         ArrayList<Character> alphabet = new ArrayList<>();
         for(int i = 0;i<input.length();i++){
             boolean contains = false;
@@ -81,7 +80,15 @@ public class Algorithms {
                 }
             }
         }
+        return output;
+    }
 
+    public static int[] inverseLFMapping(String input){
+        int[] output = new int[input.length()];
+        int [] lfMapping = lfMapping(input);
+        for(int i = 0;i<input.length();i++){
+            output[lfMapping[i]] = i;
+        }
         return output;
     }
 

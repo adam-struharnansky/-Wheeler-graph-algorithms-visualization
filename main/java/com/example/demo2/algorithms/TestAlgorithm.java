@@ -1,22 +1,25 @@
 package com.example.demo2.algorithms;
 
 import com.example.demo2.algorithmDisplays.*;
-import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
+import com.example.demo2.algorithmDisplays.DisplayType;
 import com.example.demo2.algorithmDisplays.animatableNodes.Edge;
 import com.example.demo2.algorithmDisplays.animatableNodes.Vertex;
 import com.example.demo2.algorithmManager.AlgorithmManager;
 import com.example.demo2.animations.Animation;
 import com.example.demo2.animations.AnimationManager;
 import com.example.demo2.animations.AnimationType;
+import com.example.demo2.auxiliary.Colors;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class TestAlgorithm extends Algorithm {
 
     private GraphDisplay graphDisplay;
+    private MatrixDisplay matrixDisplay;
     private TextDisplay textDisplay;
 
     private CodeDisplay codeDisplay1;
@@ -30,12 +33,29 @@ public class TestAlgorithm extends Algorithm {
 
     private final Random random = new Random();
 
-    private static int V = 10;
+    private static int V = 9;
 
+    private void addEdge(int start, int end, char val){
+        this.matrixDisplay.setSquareText(end + 1, start + 1, val);
+        this.textDisplay.addString("("+start+", "+end+") = "+val+"\n ", "", false);
+        Edge edge = this.graphDisplay.addEdge(this.vertices.get(start), this.vertices.get(end));
+        edge.setColor(Colors.getColor(alphabet.indexOf(val)));
+        edge.setText(val);
+
+    }
+
+    ArrayList<Character> alphabet = new ArrayList<>(List.of('$', 'a', 'b', 'd', 'k', 'r'));
     public TestAlgorithm(AlgorithmManager algorithmManager){
         super(algorithmManager);
         this.graphDisplay = (GraphDisplay) WindowManager.addDisplay(DisplayType.DirectedGraph, "",1);
-
+        this.matrixDisplay = (MatrixDisplay) WindowManager.addDisplay(DisplayType.Matrix,"", 1);
+        this.matrixDisplay.setMatrixSize(V+1,V+1);
+        for(int i = 0;i<V;i++){
+            this.matrixDisplay.setSquareText(i + 1, 0, i);
+            this.matrixDisplay.setSquareText(0, i + 1, i);
+        }
+        this.textDisplay = (TextDisplay) WindowManager.addDisplay(DisplayType.Text, "", 1);
+        this.textDisplay.addString("    \n ","", false);
         for(int i = 0;i<V;i++){
             Vertex v = this.graphDisplay.addVertex();
             v.setRelativePosition(random.nextDouble(),random.nextDouble());
@@ -43,15 +63,18 @@ public class TestAlgorithm extends Algorithm {
             this.vertices.add(v);
             this.visibleVertices.add(v);
         }
+        addEdge(0, 1, 'a');
+        addEdge(1, 8, 'r');
+        addEdge(4, 8, 'r');
+        addEdge(7, 4, 'a');
 
-        for(int i = 0;i<15;i++){
-            int start = Math.abs(random.nextInt()%V);
-            int end = Math.abs(random.nextInt()%V);
-            if(start != end) {
-               // Edge edge = this.graphDisplay.addEdge(this.vertices.get(start), this.vertices.get(end));
-               // edge.setText(i);
-            }
-        }
+        addEdge(3, 7, 'k');
+        addEdge(6, 3, 'a');
+        addEdge(2, 6, 'd');
+        addEdge(8, 5, 'b');
+        addEdge(5, 2, 'a');
+        addEdge(2, 0, '$');
+
 
         super.addNextBackAnimateControls(0,1,0,0,0,2);
     }

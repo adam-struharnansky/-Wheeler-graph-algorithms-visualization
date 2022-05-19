@@ -2,7 +2,7 @@ package com.example.demo2.algorithms.wg;
 
 import com.example.demo2.algorithmDisplays.*;
 import com.example.demo2.algorithmDisplays.animatableNodes.DirectedVertex;
-import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
+import com.example.demo2.algorithmDisplays.DisplayType;
 import com.example.demo2.algorithmDisplays.animatableNodes.Edge;
 import com.example.demo2.algorithmDisplays.animatableNodes.Vertex;
 import com.example.demo2.algorithmManager.AlgorithmManager;

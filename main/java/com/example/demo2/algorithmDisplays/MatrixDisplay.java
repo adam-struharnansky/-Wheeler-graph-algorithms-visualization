@@ -46,7 +46,6 @@ public class MatrixDisplay extends Display{
     public void centre(){
 
         //todo - zmenit ako su sipky v arrow, ako tam funguju tie medzery - aby to bolo v strede, kedze gapy su rozdielne
-
         //todo - nejak zmena velkosti
 
         ArrayList<Double> longestWordsPrefixSum = new ArrayList<>(List.of(0.0));
@@ -60,9 +59,9 @@ public class MatrixDisplay extends Display{
             }
             longestWordsPrefixSum.add(longestWordsPrefixSum.get(i) + longestWord);
         }
-        double horizontalGap = Math.max(0.0, (super.getPane().getWidth() - 0.0
+        double horizontalGap = Math.max(0.0, (super.getWidth() - 0.0
                 - longestWordsPrefixSum.get(longestWordsPrefixSum.size() - 1))/(this.numberOfColumns + 1));
-        double verticalGap = Math.max(0.0, (super.getPane().getHeight() - 0.0)/(this.numberOfRows + 1));
+        double verticalGap = Math.max(0.0, (super.getHeight() - 0.0)/(this.numberOfRows + 1));
 
         for(int i = 0;i<this.numberOfRows;i++){
             for(int j = 0;j<this.numberOfColumns;j++){
@@ -296,6 +295,13 @@ public class MatrixDisplay extends Display{
         }
     }
 
+    public void removeMatrixArrow(Animation animation, int startRow, int startColumn, int endRow, int endColumn){
+        MatrixArrow arrow = storedMatrixArrow(startRow, startColumn, endRow, endColumn);
+        if(arrow != null){
+            animation.addAnimatable(AnimationType.DisappearAnimation, arrow);
+        }
+    }
+
     public void setMatrixArrowColor(int startRow, int startColumn, int endRow, int endColumn, Color color){
         MatrixArrow arrow = storedMatrixArrow(startRow, startColumn, endRow, endColumn);
         if(arrow != null){
@@ -335,8 +341,10 @@ public class MatrixDisplay extends Display{
 
     public void clearMatrixArrows(Animation animation){
         //todo - treba pridat matrixArrowom dis/appear
-        this.arrows.forEach(MatrixArrow::delete);
-        this.arrows.clear();
+        this.arrows.forEach(matrixArrow -> removeMatrixArrow(animation,
+                matrixArrow.startCoordinates().getKey(), matrixArrow.startCoordinates().getValue(),
+                matrixArrow.endCoordinates().getKey(), matrixArrow.endCoordinates().getValue()));
+        this.arrows.clear();//?
     }
 
     public void unhighlightBackgrounds(){
@@ -385,6 +393,7 @@ public class MatrixDisplay extends Display{
         unhighlightMatrixArrows(animation);
         unhighlightSquares(animation);
     }
+
 
     public void setSize(double size){
         this.size = size;
@@ -456,7 +465,7 @@ public class MatrixDisplay extends Display{
             MatrixArrow arrow = new MatrixArrow(this.pane, this.textFlowMatrix, this.size, arrowMargin,
                     startRow, startColumn, endRow, endColumn);
             this.arrows.add(arrow);
-            animation.addAnimatable(AnimationType.ColorAnimation, arrow, color);
+            animation.addAnimatable(AnimationType.AppearAnimation, arrow);
         }
     }
 
@@ -518,7 +527,6 @@ public class MatrixDisplay extends Display{
 
         //prejst cez arrows, a najskor pridat tie, ktore tu nie su
         //potom odstranit vsetky, ktore nie su v memente
-        System.out.println("vypise tu nieco");
         //todo naprogramovat navrat
         //ked robime krok spat, chceme, aby sa vsetky
     }

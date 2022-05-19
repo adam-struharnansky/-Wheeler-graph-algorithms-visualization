@@ -3,10 +3,9 @@ package com.example.demo2.algorithmDisplays.animatableNodes;
 import com.example.demo2.algorithmDisplays.GraphDisplay;
 import com.example.demo2.auxiliary.AuxiliaryMath;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.util.Pair;
-
-import java.util.Objects;
 
 public class DirectedEdge extends Edge {
 
@@ -14,8 +13,9 @@ public class DirectedEdge extends Edge {
 
     DirectedEdge(GraphDisplay graphDisplay, Pane graphPane, Vertex vertexFrom, Vertex vertexTo){
         super(graphDisplay,graphPane, vertexFrom, vertexTo);
-        this.triangle = new Polygon(4.0, 0.0, 0.0, 8.0, 8.0, 8.0);//todo - dynamicke menenie velksoti
+        this.triangle = new Polygon(4.0, 0.0, 0.0, 8.0, 8.0, 8.0);//todo - Dynamic size change
         this.graphPane.getChildren().add(this.triangle);
+        this.triangle.toFront();
         redraw();
     }
 
@@ -28,43 +28,27 @@ public class DirectedEdge extends Edge {
     @Override
     public void redraw() {
         super.redraw();
-        if(this.triangle == null){//ked je volany od konstruktora od super
+        if(this.triangle == null){//If is it call from Edge constructor
             return;
         }
 
         Pair<Double, Double> directionVector = new Pair<>(
-                this.vertexFrom.getPosition().getKey()-this.vertexTo.getPosition().getKey(),
-                this.vertexFrom.getPosition().getValue()-this.vertexTo.getPosition().getValue());
-        double directionVectorSize = Math.sqrt(directionVector.getKey()*directionVector.getKey() +
-                directionVector.getValue()*directionVector.getValue());
-        if(directionVectorSize == 0.0){
-            directionVectorSize = 0.1;//todo - skontrolovat toto, asi to cele prepisat, mozno ked to bude
-            //az take male, ze to nebude ani vidno, bude kratsi ako radius*2, tak to nevykreslit
+                this.vertexTo.edgeEnd(this).getX() - this.vertexTo.getPosition().getKey(),
+                this.vertexTo.edgeEnd(this).getY() - this.vertexTo.getPosition().getValue());
+        double directionVectorSize = AuxiliaryMath.vectorSize(directionVector);
+        if (directionVectorSize == 0.0) {
+            directionVectorSize = 0.1;
         }
-        directionVector = new Pair<>(this.graphDisplay.getVertexRadius()*directionVector.getKey()/directionVectorSize,
-                this.graphDisplay.getVertexRadius()*directionVector.getValue()/directionVectorSize);
+        directionVector = new Pair<>(this.graphDisplay.getVertexRadius() * directionVector.getKey() / directionVectorSize,
+                this.graphDisplay.getVertexRadius() * directionVector.getValue() / directionVectorSize);
 
-        this.triangle.setLayoutX(this.vertexTo.getPosition().getKey() + directionVector.getKey() - 4.0);//todo - pri zmene to je inde
-        this.triangle.setLayoutY(this.vertexTo.getPosition().getValue() + directionVector.getValue() - 4.0);//todo dynamicka zmena
+        //todo Dynamic size change (change 4.0 to something computed)
+        this.triangle.setLayoutX(this.vertexTo.getPosition().getKey() + directionVector.getKey() - 4.0);
+        this.triangle.setLayoutY(this.vertexTo.getPosition().getValue() + directionVector.getValue() - 4.0);
 
-        double rotationAngle = 0.0;
-        //todo - skontorlovat ci toto funguje, je tu zmena == na equals, pozriet dokumentaciu
-        if(Objects.equals(this.vertexFrom.getPosition().getKey(), this.vertexTo.getPosition().getKey())){
-            if(this.vertexFrom.getPosition().getValue() > this.vertexTo.getPosition().getValue()){
-                rotationAngle = 0.0;
-            }
-        }
-        else{
-            Pair<Double, Double> p = new Pair<>(this.vertexFrom.getPosition().getKey(), this.vertexFrom.getPosition().getValue() - 40);
-            double a = AuxiliaryMath.vectorSize(this.vertexFrom.getPosition(), this.vertexTo.getPosition());
-            double b = 40.0; // vectorSize(this.from.getPosition(), p) = 40.0
-            double c = AuxiliaryMath.vectorSize(this.vertexTo.getPosition(), p);
-            rotationAngle = Math.acos(-(c*c - a*a - b*b)/(2*a*b));
-            if(this.vertexFrom.getPosition().getKey() > this.vertexTo.getPosition().getKey()){
-                rotationAngle = 2*Math.PI - rotationAngle;
-            }
-        }
-        this.triangle.setRotate(rotationAngle*57.2957795);
+        double rotationAngle = AuxiliaryMath.circularAngle(new Pair<>(super.endControl.getX(), super.endControl.getY()),
+                new Pair<>(super.endPoint.getX(), super.endPoint.getY()));
+        this.triangle.setRotate(rotationAngle * 57.2957795);
     }
 
     @Override
@@ -79,4 +63,19 @@ public class DirectedEdge extends Edge {
         this.triangle.setOpacity(opacity);
     }
 
+    @Override
+    public void setColor(Color color){
+        super.setColor(color);
+        if(super.getWaysNumber() == 1){
+            this.triangle.setStroke(color);
+            this.triangle.setFill(color);
+        }
+    }
+
+    @Override
+    public void toPaneFront(){
+        if(this.triangle != null) {
+            this.triangle.toFront();
+        }
+    }
 }

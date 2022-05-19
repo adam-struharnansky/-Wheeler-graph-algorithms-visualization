@@ -2,7 +2,7 @@ package com.example.demo2.algorithms.bwt;
 
 import com.example.demo2.algorithmDisplays.WindowManager;
 import com.example.demo2.algorithmDisplays.SelectorDisplay;
-import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
+import com.example.demo2.algorithmDisplays.DisplayType;
 import com.example.demo2.algorithmManager.AlgorithmManager;
 import com.example.demo2.algorithmManager.AlgorithmType;
 import com.example.demo2.algorithms.Algorithm;
@@ -32,7 +32,8 @@ public class BWTDivisionAlgorithm extends Algorithm {
 
         SelectorDisplay selectorDisplay4 = (SelectorDisplay)
                 WindowManager.addDisplay(DisplayType.Selector, "", 1);
-        selectorDisplay4.setChoice("BWTPatternMatching", "BWTPatternMatchingDescription", AlgorithmType.BWTSearch, algorithmManager);
-
+        if (selectorDisplay4 != null) {
+            selectorDisplay4.setChoice("BWTPatternMatching", "BWTPatternMatchingDescription", AlgorithmType.BWTSearch, algorithmManager);
+        }
     }
 }

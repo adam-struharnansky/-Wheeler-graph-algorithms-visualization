@@ -3,7 +3,7 @@ package com.example.demo2.algorithms.bwt;
 import com.example.demo2.algorithmDisplays.WindowManager;
 import com.example.demo2.algorithmDisplays.MatrixDisplay;
 import com.example.demo2.algorithmDisplays.TextDisplay;
-import com.example.demo2.algorithmDisplays.animatableNodes.DisplayType;
+import com.example.demo2.algorithmDisplays.DisplayType;
 import com.example.demo2.algorithmManager.AlgorithmManager;
 import com.example.demo2.algorithmManager.AlgorithmType;
 import com.example.demo2.algorithms.Algorithm;
@@ -46,6 +46,8 @@ public class BWTGeneralAlgorithm extends Algorithm {
         LanguageListenerAdder.addLanguageListener("start", this.startButton);
         this.startButton.setOnAction(actionEvent -> start(this.inputTextField.getText()));
         WindowManager.addController(this.startButton, 0,1);
+
+        assert this.textDisplay != null;
         this.textDisplay.addString("inputTextForAlgorithm", "", true);
     }
 
@@ -117,5 +119,10 @@ public class BWTGeneralAlgorithm extends Algorithm {
         bwtButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.BWT));
         LanguageListenerAdder.addLanguageListener("returnToBWT", bwtButton);
         WindowManager.addController(bwtButton, 0,2);
+
+        Button wgButton = new Button();
+        wgButton.setOnAction(actionEvent -> this.algorithmManager.changeAlgorithm(AlgorithmType.WGFromBWT, this.input));
+        LanguageListenerAdder.addLanguageListener("connectionWithWG", wgButton);
+        WindowManager.addController(wgButton, 1,0);
     }
 }

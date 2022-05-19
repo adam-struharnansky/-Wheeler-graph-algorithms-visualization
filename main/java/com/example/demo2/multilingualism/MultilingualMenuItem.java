@@ -32,6 +32,10 @@ public class MultilingualMenuItem extends MenuItem implements LanguageListener{
         else{
             this.menuItem.setText(this.text.getString());
         }
+    }
 
+    @Override
+    public boolean removable(){
+        return false;
     }
 }

@@ -8,6 +8,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
+import java.util.HashMap;
+
 public class Display{
 
     private final VBox container;
@@ -19,6 +21,8 @@ public class Display{
 
     private double width;
     private double height;
+
+    private static double menuHeight = 20.0;
 
     public Display(VBox container, String name, int ratio){
         this.container = container;
@@ -33,6 +37,7 @@ public class Display{
         Label nameLabel = new Label();
         LanguageListenerAdder.addLanguageListener(name, nameLabel);
         this.toolBar.getItems().add(nameLabel);
+        this.toolBar.setPrefWidth(menuHeight);
 
         Button changeSizeButton = new Button("*");//todo - porozmyslat, ako toto vykrelsit co najlepsie
         changeSizeButton.setOnAction(actionEvent -> {
@@ -82,7 +87,10 @@ public class Display{
         return this.width;
     }
 
-    public double getHeight(){ return this.height;}
+    public double getHeight(){
+        toolBar.autosize();
+        return this.height - toolBar.getHeight();
+    }
 
     protected Pane getPane(){
         return this.pane;
@@ -117,11 +125,20 @@ public class Display{
         void doAction();
     }
 
+    private final HashMap<String, Button> namesButtonsMap = new HashMap<>();
+
     protected void addButton(String name, ControlButtonAction controlButtonAction){
         Button controlButton = new Button();
         controlButton.setOnAction(actionEvent -> controlButtonAction.doAction());
         LanguageListenerAdder.addLanguageListener(name, controlButton);
         this.toolBar.getItems().add(1, controlButton);
+        this.namesButtonsMap.put(name, controlButton);
+    }
+
+    protected void setDisable(String name, boolean disable){
+        if(namesButtonsMap.containsKey(name)){
+            namesButtonsMap.get(name).setDisable(disable);
+        }
     }
 
     protected void disableButtons(){

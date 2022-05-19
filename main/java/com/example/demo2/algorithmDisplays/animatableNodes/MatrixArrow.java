@@ -8,7 +8,7 @@ import javafx.util.Pair;
 
 import java.util.ArrayList;
 
-public class MatrixArrow implements ColorAnimatable {
+public class MatrixArrow implements ColorAnimatable, AppearAnimatable{
 
     private final Pane pane;
     private double size;
@@ -307,6 +307,29 @@ public class MatrixArrow implements ColorAnimatable {
                 "isHighlighted:"+this.isHighlighted+";"+
                 "]";
     }
+
+    @Override
+    public void appear() {
+        this.curve.setVisible(true);
+        this.triangle.setVisible(true);
+    }
+
+    @Override
+    public void disappear() {
+        this.curve.setVisible(false);
+        this.triangle.setVisible(false);
+    }
+
+    @Override
+    public void setOpacity(double opacity) {
+        setColor(new Color(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), opacity));
+    }
+
+    @Override
+    public double getOpacity() {
+        return this.color.getOpacity();
+    }
+
     enum Direction{up, down, right, left}
 }
 

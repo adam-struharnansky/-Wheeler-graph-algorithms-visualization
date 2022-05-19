@@ -20,6 +20,11 @@ public class MultilingualButton extends Button implements LanguageListener{
         super.setText(this.text.getString());
     }
 
+    @Override
+    public boolean removable(){
+        return true;
+    }
+
     //chceme triedu, ktora bude mat to, ze vieme vlozit objekt,
     //ktory bude mat funkciu
     //vsetky su z java.scene.control, pozriet sa od koho to beru

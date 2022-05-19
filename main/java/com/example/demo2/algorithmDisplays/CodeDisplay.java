@@ -23,6 +23,7 @@ public class CodeDisplay extends Display{
     //todo - Fix bug: when narrowing display, the program freezes
     //todo - Set some color to "programing" words: int, for, if, while, ...
     //todo - If line contains only space, don't draw it
+    //todo - Not possible to use highlighting arrows with and without animation in the same time (program crashes)
 
     static final double padding = 3.0;
 
@@ -57,7 +58,7 @@ public class CodeDisplay extends Display{
         }
 
         void redraw(){
-            //todo urobit prepisovanie textbackgroundov
+            this.contentTexts.forEach(AnimatableText::removeBackground);
             this.contentTexts.forEach(contentText -> getPane().getChildren().remove(contentText));
             this.contentTexts.clear();
 
@@ -106,6 +107,7 @@ public class CodeDisplay extends Display{
                 line.redraw();
             }
             setHighlighted(this.isHighlighted);
+            setColor(getColor());
         }
 
         public void setHighlighted(boolean highlighted) {
@@ -119,11 +121,13 @@ public class CodeDisplay extends Display{
         }
 
         void highlight(){
-            //todo
+            this.isHighlighted = true;
+            setColor(Colors.highlightingColor);
         }
 
         void unhighlight(){
-            //todo
+            this.isHighlighted = false;
+            setColor(Color.TRANSPARENT);
         }
 
         void setY(double y){
@@ -203,6 +207,7 @@ public class CodeDisplay extends Display{
             this.text.setText(this.name+" = "+this.value);
             this.text.redraw();
             setHighlighted(this.isHighlighted);
+            setColor(this.getColor());
         }
 
         public void setHighlighted(boolean highlighted) {
@@ -216,11 +221,13 @@ public class CodeDisplay extends Display{
         }
 
         void highlight(){
-            //todo
+            this.isHighlighted = true;
+            this.setColor(Colors.highlightingColor);
         }
 
         void unhighlight(){
-            //todo
+            this.isHighlighted = false;
+            this.setColor(Color.TRANSPARENT);
         }
 
         void setY(double y){
@@ -319,8 +326,6 @@ public class CodeDisplay extends Display{
         this.separator.setEndY(y);
         y += padding*this.size;
 
-        //todo - nastavit premenne, aby boli vedal seba, kym sa nedostanu ku koncu riadku
-        //iba jednoduchy cyklus, ziadne binarne vyhladavanie
         if(!this.variables.isEmpty()){
             y += this.variables.get(0).getHeight()/2;
         }
@@ -371,6 +376,9 @@ public class CodeDisplay extends Display{
             this.variables.add(variable);
             centre();
             animation.addAnimatable(AnimationType.AppearAnimation, variable);
+        }
+        else{
+            animation.addAnimatable(AnimationType.AppearAnimation, storedVariable(name));
         }
     }
 
@@ -432,7 +440,7 @@ public class CodeDisplay extends Display{
         Variable variable = storedVariable(name);
         if(variable != null){
             animation.addAnimatable(AnimationType.ColorAnimation, variable, Color.TRANSPARENT, Colors.highlightingColor);
-            variable.setHighlighted(true);
+            //variable.setHighlighted(true);
             this.highlightedVariables.add(variable);
         }
     }

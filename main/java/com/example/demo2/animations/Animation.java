@@ -10,7 +10,7 @@ import java.util.*;
 public class Animation {
 
     //todo asi nastavit, aby sa toto dalo menit
-    private final static int iterationNumber = 50;
+    private int iterationNumber = 50;
     private int iterate;
 
     private boolean forward = true;
@@ -38,6 +38,12 @@ public class Animation {
     //objekty, sktore maju zmiznut
     private final HashSet<AppearAnimatable> disappearAnimatable = new HashSet<>();
 
+    //objekty, ktore sa maju objavit na konci animacie
+    private final HashSet<AppearAnimatable> suddenlyAppearAnimatables = new HashSet<>();
+
+    //objekty, sktore maju zmiznut na konci animacie
+    private final HashSet<AppearAnimatable> suddenlyDisappearAnimatable = new HashSet<>();
+
     //objekty a relativne miesta, kde maju skoncit
     private final HashMap<RelativeMoveAnimatable, Pair<Double, Double>> relativeMoveAnimatableStarts = new HashMap<>();
     //objekty a relativne miesta, kde maju skoncit
@@ -61,6 +67,8 @@ public class Animation {
         switch (type){
             case AppearAnimation -> addAppearAnimatable((AppearAnimatable) animatable);
             case DisappearAnimation -> addDisappearAnimatable((AppearAnimatable) animatable);
+            case SuddenlyAppearAnimation -> addSuddenlyAppearAnimatable((AppearAnimatable) animatable);
+            case SuddenlyDisappearAnimation -> addSuddenlyDisappearAnimatable((AppearAnimatable) animatable);
         }
     }
 
@@ -94,31 +102,17 @@ public class Animation {
             Double> endPosition){
         this.moveAnimatableStarts.put(animatable, Auxiliary.newPair(startPosition));
         this.moveAnimatableEnds.put(animatable, Auxiliary.newPair(endPosition));
-        this.moveAnimatableSteps.put(animatable, new Pair<>(
-                (endPosition.getKey() - startPosition.getKey())/iterationNumber,
-                (endPosition.getValue() - startPosition.getValue())/iterationNumber
-        ));
     }
 
     private void addRelativeMoveAnimatable(RelativeMoveAnimatable animatable, Pair<Double, Double> startPosition,
                                       Pair<Double, Double> endPosition){
         this.relativeMoveAnimatableStarts.put(animatable, Auxiliary.newPair(startPosition));
         this.relativeMoveAnimatableEnds.put(animatable, Auxiliary.newPair(endPosition));
-        this.relativeMoveAnimatableSteps.put(animatable, new Pair<>(
-                (endPosition.getKey() - startPosition.getKey())/iterationNumber,
-                (endPosition.getValue() - startPosition.getValue())/iterationNumber
-        ));
     }
 
     private void addColorAnimatable(ColorAnimatable animatable, Color startColor, Color endColor){
         this.colorAnimatableStarts.put(animatable, Auxiliary.newColor(startColor));
         this.colorAnimatableEnds.put(animatable, Auxiliary.newColor(endColor));
-        this.colorAnimatableSteps.put(animatable, new ArrayList<>(Arrays.asList(
-                (endColor.getRed() - startColor.getRed())/iterationNumber,
-                (endColor.getGreen() - startColor.getGreen())/iterationNumber,
-                (endColor.getBlue() - startColor.getBlue())/iterationNumber,
-                (endColor.getOpacity() - startColor.getOpacity())/iterationNumber
-        )));
     }
 
     private void addAppearAnimatable(AppearAnimatable animatable){
@@ -129,12 +123,52 @@ public class Animation {
         this.disappearAnimatable.add(animatable);
     }
 
+    private void addSuddenlyAppearAnimatable(AppearAnimatable animatable){
+        this.suddenlyAppearAnimatables.add(animatable);
+    }
+
+    private void addSuddenlyDisappearAnimatable(AppearAnimatable animatable){
+        this.suddenlyDisappearAnimatable.add(animatable);
+    }
+
     public void setForward(boolean forward){
         this.forward = forward;
         this.forwardInt = (this.forward)? 1 : -1;
     }
 
     public void startAnimation(){
+
+
+        this.relativeMoveAnimatableSteps.clear();
+        this.colorAnimatableSteps.clear();
+        this.moveAnimatableSteps.clear();
+
+        this.relativeMoveAnimatableStarts.forEach((animatable, start) ->{
+            Pair<Double, Double> step = new Pair<>(
+                    (this.relativeMoveAnimatableEnds.get(animatable).getKey() - start.getKey())/iterationNumber,
+                    (this.relativeMoveAnimatableEnds.get(animatable).getValue() - start.getValue())/iterationNumber
+            );
+            this.relativeMoveAnimatableSteps.put(animatable, step);
+        });
+
+        this.moveAnimatableStarts.forEach((animatable, start) ->{
+            Pair<Double, Double> step = new Pair<>(
+                    (this.moveAnimatableEnds.get(animatable).getKey() - start.getKey())/iterationNumber,
+                    (this.moveAnimatableEnds.get(animatable).getValue() - start.getValue())/iterationNumber
+            );
+            this.moveAnimatableSteps.put(animatable, step);
+        });
+
+        this.colorAnimatableStarts.forEach((animatable, start) ->{
+            ArrayList<Double> step = new ArrayList<>(Arrays.asList(
+                    (this.colorAnimatableEnds.get(animatable).getRed() - start.getRed())/iterationNumber,
+                    (this.colorAnimatableEnds.get(animatable).getGreen() - start.getGreen())/iterationNumber,
+                    (this.colorAnimatableEnds.get(animatable).getBlue() - start.getBlue())/iterationNumber,
+                    (this.colorAnimatableEnds.get(animatable).getOpacity() - start.getOpacity())/iterationNumber
+            ));
+            this.colorAnimatableSteps.put(animatable, step);
+        });
+
         this.iterate = 0;
         this.timer = new Timer();
         if(this.forward){
@@ -142,15 +176,24 @@ public class Animation {
             this.relativeMoveAnimatableStarts.forEach(RelativeMoveAnimatable::setRelativePosition);
             this.colorAnimatableStarts.forEach(ColorAnimatable::setColor);
 
+            this.appearAnimatables.forEach(AppearAnimatable::appear);//aby existovali, inak su neviditelne
+            this.disappearAnimatable.forEach(AppearAnimatable::appear);
             this.appearAnimatables.forEach(animatable -> animatable.setOpacity(0.0));
             this.disappearAnimatable.forEach(animatable -> animatable.setOpacity(1.0));
+            this.suddenlyAppearAnimatables.forEach(AppearAnimatable::disappear);
+            this.suddenlyDisappearAnimatable.forEach(AppearAnimatable::appear);
         }
         else{
             this.moveAnimatableEnds.forEach(MoveAnimatable::setPosition);
             this.relativeMoveAnimatableEnds.forEach(RelativeMoveAnimatable::setRelativePosition);
             this.colorAnimatableEnds.forEach(ColorAnimatable::setColor);
+
+            this.appearAnimatables.forEach(AppearAnimatable::appear);//aby existovali, inak su neviditelne
+            this.disappearAnimatable.forEach(AppearAnimatable::appear);
             this.appearAnimatables.forEach(animatable -> animatable.setOpacity(1.0));
             this.disappearAnimatable.forEach(animatable -> animatable.setOpacity(0.0));
+            this.suddenlyAppearAnimatables.forEach(AppearAnimatable::disappear);
+            this.suddenlyDisappearAnimatable.forEach(AppearAnimatable::appear);
         }
 
         TimerTask animateTask = new TimerTask() {
@@ -197,15 +240,25 @@ public class Animation {
             this.moveAnimatableEnds.forEach(MoveAnimatable::setPosition);
             this.relativeMoveAnimatableEnds.forEach(RelativeMoveAnimatable::setRelativePosition);
             this.colorAnimatableEnds.forEach(ColorAnimatable::setColor);
+
             this.appearAnimatables.forEach(animatable -> animatable.setOpacity(1.0));
             this.disappearAnimatable.forEach(animatable -> animatable.setOpacity(0.0));
+            this.appearAnimatables.forEach(AppearAnimatable::appear);
+            this.disappearAnimatable.forEach(AppearAnimatable::disappear);
+            this.suddenlyAppearAnimatables.forEach(AppearAnimatable::appear);
+            this.suddenlyDisappearAnimatable.forEach(AppearAnimatable::disappear);
         }
         else{
             this.moveAnimatableStarts.forEach(MoveAnimatable::setPosition);
             this.relativeMoveAnimatableStarts.forEach(RelativeMoveAnimatable::setRelativePosition);
             this.colorAnimatableStarts.forEach(ColorAnimatable::setColor);
+
             this.appearAnimatables.forEach(animatable -> animatable.setOpacity(0.0));
             this.disappearAnimatable.forEach(animatable -> animatable.setOpacity(1.0));
+            this.appearAnimatables.forEach(AppearAnimatable::disappear);
+            this.disappearAnimatable.forEach(AppearAnimatable::appear);
+            this.suddenlyAppearAnimatables.forEach(AppearAnimatable::disappear);
+            this.suddenlyDisappearAnimatable.forEach(AppearAnimatable::appear);
         }
     }
 
@@ -223,7 +276,15 @@ public class Animation {
         this.relativeMoveAnimatableSteps.clear();
 
         this.appearAnimatables.clear();
-
         this.disappearAnimatable.clear();
+        this.suddenlyDisappearAnimatable.clear();
+        this.suddenlyAppearAnimatables.clear();
+    }
+
+    /*
+    treba prepocitat vsekty hodnoty v
+     */
+    public void setSpeed(double speed){
+        iterationNumber = (int) (300 - speed*2.5);
     }
 }

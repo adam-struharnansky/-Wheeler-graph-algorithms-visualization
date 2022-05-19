@@ -12,9 +12,16 @@ public class AnimationManager {
     private int currentAnimation = -1;
     private final ArrayList<Animation> animations = new ArrayList<>();
 
+    private final ArrayList<Integer> possiblyRunningAnimations = new ArrayList<>();
+
+    public void endAllAnimations(){
+        this.possiblyRunningAnimations.forEach(integer -> animations.get(integer).endAnimation());
+    }
+
     public void endCurrentAnimation(boolean forward){
         if(this.currentAnimation != -1) {
             this.animations.get(currentAnimation).endAnimation();
+            possiblyRunningAnimations.remove(Integer.valueOf(this.currentAnimation));
         }
     }
 
@@ -22,6 +29,7 @@ public class AnimationManager {
         if(0 <= step && step < this.animations.size()) {
             this.animations.get(step).setForward(forward);
             this.animations.get(step).endAnimation();
+            possiblyRunningAnimations.remove(Integer.valueOf(this.currentAnimation));
         }
     }
 
@@ -70,6 +78,7 @@ public class AnimationManager {
 
     public Animation getAnimation(int step){
         fulfilAnimationsToStep(step);
+        this.possiblyRunningAnimations.add(step);
         return this.animations.get(step);
     }
 }
